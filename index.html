@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="old-fashioned.png">
+    <script src="old-fashioned.js"></script>
+    <script src="old-fashioned-forms.js"></script>
+    <script>
+      window.onload = () => {
+        const sceneManager = new SceneManager();
+        const scene = sceneManager.createScene('examples', 'Old Fashioned Examples');
+        const scene2 = sceneManager.createScene('login', 'Old Fashioned Forms');
+        scene2.add(new Label("Login", FontSize.LARGE), Position.NORTH);
+        scene2.add(new ImageLabel("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzMwMHB4JyB3aWR0aD0nMzAwcHgnICBmaWxsPSIjMDAwMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHg9IjBweCIgeT0iMHB4Ij48dGl0bGU+Q29ja3RhaWxfR2xhc3N3YXJlXzAxX1BlcnNwZWN0aXZlPC90aXRsZT48cGF0aCBkPSJNNjkuMDA1OSwxNy4yNjMyQzYzLjkyMzgsMTYuNzcxLDU3LjE3MzgsMTYuNSw1MCwxNi41cy0xMy45MjM4LjI3MS0xOS4wMDU5Ljc2MzJjLTguMDc4Ni43ODI3LTguNzM1OCwxLjc0MzEtOC43MzU4LDIuODI2NmEuOTcuOTcsMCwwLDAsLjAwNjMuMTExOWw2LjM2NzIsNTYuNDc0MUE0LjUzMjMsNC41MzIzLDAsMCwwLDMxLjU0LDgwLjQyLDUyLjY4MjYsNTIuNjgyNiwwLDAsMCw0OS45NTU2LDgzLjVhNTMuMjYwOSw1My4yNjA5LDAsMCwwLDE4LjQ5MzEtMy4wODMsNC41Myw0LjUzLDAsMCwwLDIuOTItMy43NDk1bDYuMzY2My01Ni40NjU4YS45Ny45NywwLDAsMCwuMDA2My0uMTExOUM3Ny43NDE3LDE5LjAwNjMsNzcuMDg0NSwxOC4wNDU5LDY5LjAwNTksMTcuMjYzMlpNNTAsMTguNWMxNC4xMjksMCwyMy4zOTI5LDEuMDI1LDI1LjUzLDEuODYxOEM3Mi45MjU2LDIxLjIxODQsNjMuOTE3MiwyMi4xOCw1MCwyMi4xOHMtMjIuOTI1Ni0uOTYxMy0yNS41My0xLjgxNzlDMjYuNjA3MSwxOS41MjUsMzUuODcxLDE4LjUsNTAsMTguNVpNNjkuMzgxOCw3Ni40NDM0YTIuNTQsMi41NCwwLDAsMS0xLjYzNzIsMi4xMDE1QTUxLjIyMTUsNTEuMjIxNSwwLDAsMSw0OS45NTU2LDgxLjVhNTAuNjUsNTAuNjUsMCwwLDEtMTcuNzA3MS0yLjk1LDIuNTQwNiwyLjU0MDYsMCwwLDEtMS42Mjk0LTIuMDk4NkwyNC40MDEyLDIxLjMwMjlDMjkuOTI4NiwyMy4xMTc3LDQ3LjY1MTIsMjMuMTgsNTAsMjMuMThzMjAuMDcxNC0uMDYyLDI1LjU5ODgtMS44NzY4WiI+PC9wYXRoPjwvc3ZnPg=="
+                                  , "200px", "200px"), Position.WEST);
+         scene2.add(
+           new SimpleFormContainer(
+              new SimpleFormInput('Name', 'name'), 
+              new SimpleFormInput('Age', 'age')
+              ), Position.CENTER);                         
+
+        scene.add(new Button("Click Me"), Position.EAST);
+        scene.add(
+          new Label("Welcome to old-fashioned.js", FontSize.LARGE),
+          Position.NORTH
+        );
+        const centerContainer = new Container(new GridLayout(2));
+        let counter = 0;
+        centerContainer.add(new Label("Input " + (++counter)));
+        const mainInput = new TextField('type here ' + counter);
+        centerContainer.add(mainInput);
+        const addInputButton = new Button("Add");
+        addInputButton.addActionListener((e) => {
+          centerContainer.remove(addInputButton);
+          centerContainer.add(new Label("Input " + (++counter)));
+          const newInput = new TextField('type here ' + counter);
+          centerContainer.add(new TextField('type here ' + counter));
+          centerContainer.add(addInputButton);
+        });
+        centerContainer.add(addInputButton);
+        scene.add(centerContainer, Position.CENTER);
+        const exitButton = new Button("Exit");
+        exitButton.addActionListener((e) => sceneManager.routeTo("login"));
+        scene.add(exitButton, Position.SOUTH);
+        const westContainer = new Container();
+        westContainer.add(new Button("First"), Position.NORTH);
+        westContainer.add(new TextArea("Type here"), Position.CENTER);
+        westContainer.add(new Button("Third"), Position.SOUTH);
+        scene.add(westContainer, Position.WEST);
+
+        sceneManager.routeTo('examples');
+      };
+    </script>
+    <style></style>
+  </head>
+  <body>
+    <div id="glass"></div>
+  </body>
+</html>
