@@ -196,7 +196,7 @@ class TextArea extends TextComponent {
     super(text, ["textarea"].concat(...classes));
   }
   getHtml() {
-    return `<textarea class="${this.classes.join(" ")}" onInput="ACTION_LISTENER_CONTEXT[${this.id}](event)"  id="${this.id}">${this.text}</textarea>`;
+    return `<textarea class="${this.classes.join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.text}</textarea>`;
   }
 }
 
