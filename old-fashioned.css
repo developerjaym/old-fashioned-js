@@ -10,12 +10,11 @@
   --accent-bg-color: rgb(76, 49, 142);
   --accent-fg-color: rgb(244, 244, 244);
 
+  --error-fg-color: rgb(153, 29, 13);
+
   --main-font-size: 16px;
   --code-font-size: 14px;
   --code-line-height: 16px;
-
-  --snippet-width: 55vw;
-  --snippet-height: 60vh;
 
   --border-radius: 4px;
   --border-width-thin: 1px;
@@ -42,9 +41,7 @@ body {
 }
 .scene {
   min-height: 100vh;
-  min-width: 100vw;
-  height: 100vh;
-  width: 100vw;
+  width: fit-content;
 }
 .container {
   display: grid;
@@ -62,7 +59,7 @@ body {
   row-gap: var(--margin-narrow);
 }
 
-.textfield {
+.input-component {
   padding: var(--padding-narrow);
   border-color: var(--main-fg-color);
   color: var(--main-fg-color);
@@ -72,12 +69,13 @@ body {
   border-style: solid;
 }
 
-
-
-.label {
+.label, .button {
   text-align: center;
   padding: var(--padding-thick);
   width: fit-content;
+}
+.invalid {
+  color: var(--error-fg-color)
 }
 .button {
   background-color: var(--accent-bg-color);
@@ -85,6 +83,14 @@ body {
 
   border-radius: var(--border-radius);
   border-color: var(--accent-bg-color);
+  border-width: var(--border-width-thin);
+  border-style: solid;
+}
+.disabled {
+  color: var(--error-fg-color);
+  background-color: var(--accent-fg-color);
+
+  border-color: var(--error-fg-color);
   border-width: var(--border-width-thin);
   border-style: solid;
 }
@@ -104,6 +110,14 @@ body {
     "west    center east"
     "west    center east"
     "south south  south";
+}
+.form-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "north"
+    "center"
+    "south";
 }
 .north {
   grid-area: north;

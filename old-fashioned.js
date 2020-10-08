@@ -19,9 +19,10 @@ class Layout {
     this.type = type;
   }
   getStyle() {
-    throw 'no style selected';
+    throw 'abstract layout';
   }
 }
+
 
 class GridLayout extends Layout {
   constructor(width) {
@@ -49,6 +50,30 @@ class FontSize {
   static LARGE = "large-font";
 }
 
+class Controller {
+  constructor(model) {
+    this.model = model;
+  }
+  onModelUpdate(newValue) {
+    this.model.onUpdate(newValue);
+  }
+}
+
+class Model {
+  constructor(value = {}) {
+    this.value = value;
+    this.observers = [];
+  }
+  addObserver(observer) {
+    this.observers.push(observer);
+    return this;
+  }
+  onUpdate(newValue) {
+    this.value = newValue;
+    this.observers.forEach(observer => observer.onUpdate(this.value));
+  }
+}
+
 class Observer {
   onUpdate(message) {
     throw "NYI";
@@ -60,9 +85,13 @@ class Component extends Observer {
     super();
     this.classes = ["component"].concat(...classes);
     this.id = `${this.classes.reverse()[0]}${Math.floor(Math.random() * 1000000000)}`;
+    this.parent = null;
   }
   getHtml() {
     throw "NYI";
+  }
+  setParent(parentContainer) {
+    this.parent = parentContainer;
   }
 }
 
@@ -89,6 +118,7 @@ class Container extends Component {
   }
   add(component, ...constraints) {
     switch (this.layout.type) {
+      case Layout.FORM_LAYOUT:
       case Layout.BORDER_LAYOUT:
         component.classes.push(constraints[0]);
         this.components[`${constraints[0]}`] = component;
@@ -98,6 +128,7 @@ class Container extends Component {
         this.components[`${this.counter++}`] = component;
         break;
     }
+    component.setParent(this);
     this.paint();
     return this;
   }
@@ -108,7 +139,18 @@ class Container extends Component {
         newComponents[key] = this.components[key];
       }
     }
+    componentToRemove.setParent(null);
     this.components = newComponents;
+    this.paint();
+    return this;
+  }
+  removeAll() {
+    for (const key of Object.keys(this.components)) {
+      if (this.components[key]) {
+        this.components[key].setParent(null);
+      }
+    }
+    this.components = {};
     this.paint();
     return this;
   }
@@ -134,8 +176,6 @@ class ImageLabel extends Component {
     if (this.width) {
       heightWidth += `width: ${this.width}; `;
     }
-    // background-image: url("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzMwMHB4JyB3aWR0aD0nMzAwcHgnICBmaWxsPSIjMDAwMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHg9IjBweCIgeT0iMHB4Ij48dGl0bGU+Q29ja3RhaWxfR2xhc3N3YXJlXzAxX1BlcnNwZWN0aXZlPC90aXRsZT48cGF0aCBkPSJNNjkuMDA1OSwxNy4yNjMyQzYzLjkyMzgsMTYuNzcxLDU3LjE3MzgsMTYuNSw1MCwxNi41cy0xMy45MjM4LjI3MS0xOS4wMDU5Ljc2MzJjLTguMDc4Ni43ODI3LTguNzM1OCwxLjc0MzEtOC43MzU4LDIuODI2NmEuOTcuOTcsMCwwLDAsLjAwNjMuMTExOWw2LjM2NzIsNTYuNDc0MUE0LjUzMjMsNC41MzIzLDAsMCwwLDMxLjU0LDgwLjQyLDUyLjY4MjYsNTIuNjgyNiwwLDAsMCw0OS45NTU2LDgzLjVhNTMuMjYwOSw1My4yNjA5LDAsMCwwLDE4LjQ5MzEtMy4wODMsNC41Myw0LjUzLDAsMCwwLDIuOTItMy43NDk1bDYuMzY2My01Ni40NjU4YS45Ny45NywwLDAsMCwuMDA2My0uMTExOUM3Ny43NDE3LDE5LjAwNjMsNzcuMDg0NSwxOC4wNDU5LDY5LjAwNTksMTcuMjYzMlpNNTAsMTguNWMxNC4xMjksMCwyMy4zOTI5LDEuMDI1LDI1LjUzLDEuODYxOEM3Mi45MjU2LDIxLjIxODQsNjMuOTE3MiwyMi4xOCw1MCwyMi4xOHMtMjIuOTI1Ni0uOTYxMy0yNS41My0xLjgxNzlDMjYuNjA3MSwxOS41MjUsMzUuODcxLDE4LjUsNTAsMTguNVpNNjkuMzgxOCw3Ni40NDM0YTIuNTQsMi41NCwwLDAsMS0xLjYzNzIsMi4xMDE1QTUxLjIyMTUsNTEuMjIxNSwwLDAsMSw0OS45NTU2LDgxLjVhNTAuNjUsNTAuNjUsMCwwLDEtMTcuNzA3MS0yLjk1LDIuNTQwNiwyLjU0MDYsMCwwLDEtMS42Mjk0LTIuMDk4NkwyNC40MDEyLDIxLjMwMjlDMjkuOTI4NiwyMy4xMTc3LDQ3LjY1MTIsMjMuMTgsNTAsMjMuMThzMjAuMDcxNC0uMDYyLDI1LjU5ODgtMS44NzY4WiI+PC9wYXRoPjwvc3ZnPg==");
-
     return `<div class="${this.classes.join(" ")}" id="${this.id}" style="${heightWidth}; background-image: url(${this.src}); background-repeat: no-repeat; background-size: contain;"></div>`
   }
 }
@@ -144,101 +184,124 @@ class Label extends Component {
   constructor(text, ...classes) {
     super(["label"].concat(...classes));
     this.text = text;
+    this.for = '';
   }
   getHtml() {
-    return `<label class="${this.classes.join(" ")}"  id="${this.id}">${this.text}</label>`;
+    return `<label ${this.for} class="${this.classes.join(" ")}"  id="${this.id}">${this.text}</label>`;
+  }
+  setFor(inputComponent) {
+    this.for = `for="${inputComponent.id}"`;
+    return this;
   }
 }
 
-class Button extends Label {
-  constructor(text, ...classes) {
-    super(text, ["button"].concat(...classes));
+class BaseInputComponent extends Component {
+  constructor(value, ...classes) {
+    super(["input-component"].concat(...classes));
+    this.value = value || '';
     this.actionListeners = [];
-    ACTION_LISTENER_CONTEXT[this.id] = () => this.actionListeners.forEach(listener => listener());
-  }
-  addActionListener(actionListener) {
-    this.actionListeners.push(actionListener);
-  }
-  getHtml() {
-    return `<button class="${this.classes.join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.text}</button>`;
-  }
-}
-
-class TextComponent extends Component {
-  constructor(text, ...classes) {
-    super(["text-component"].concat(...classes));
-    this.text = text || '';
-    this.actionListeners = [];
-    ACTION_LISTENER_CONTEXT[`${this.id}`] = (e) => this.text = e.target.value;
+    ACTION_LISTENER_CONTEXT[`${this.id}`] = (e) => {
+      this.value = e.target.value;
+      this.actionListeners.forEach(listener => listener(this.value));
+    };
   }
   addActionListener(actionListener) {
     this.actionListeners.push(actionListener);
   }
   getValue() {
-    return this.text;
+    return this.value;
   }
   getHtml() {
     throw 'abstract';
   }
 }
 
-class TextField extends TextComponent {
+class DropdownList extends BaseInputComponent {
+  constructor(value, arraySupplier, ...classes) {
+    super(value, ["dropdown"].concat(...classes));
+    this.options = [];
+    arraySupplier.then(
+      arr => {
+        this.options = arr;
+        if(this.parent) {
+          this.parent.paint();
+        }
+      }
+     );
+  }
+  getHtml() {
+    return `
+    <input list="${this.id}list" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
+
+    <datalist id="${this.id}list">
+      ${this.options.map(option => `<option value="${option}">`).join(" ")}
+    </datalist>
+    `
+    // return `<button class="${this.classes.join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+  }
+}
+
+class Button extends BaseInputComponent {
+  constructor(value, ...classes) {
+    super(value, ["button"].concat(...classes));
+    this.actionListeners = [];
+    ACTION_LISTENER_CONTEXT[`${this.id}`] = () => this.actionListeners.forEach(listener => listener());
+  }
+  getHtml() {
+    return `<button class="${this.classes.join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+  }
+}
+
+class TextField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="text" class="${this.classes.join(" ")}" value="${this.text}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input type="text" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
-class TextArea extends TextComponent {
+class TextArea extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textarea"].concat(...classes));
   }
   getHtml() {
-    return `<textarea class="${this.classes.join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.text}</textarea>`;
+    return `<textarea class="${this.classes.join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
   }
 }
 
-class Theme {
-  static DEFAULT = {
-    '--background-image': 'none',
-    '--main-bg-color': 'rgba(244, 244, 244, 1)',
-    '--main-fg-color': 'rgb(9, 9, 9)',
-    '--secondary-bg-color': 'rgb(244, 244, 244)',
-    '--secondary-fg-color': 'rgb(9, 9, 9)',
-    '--accent-bg-color': 'rgb(35, 135, 66)',
-    '--accent-fg-color': 'rgb(244, 244, 244)',
-    '--main-font-size': '16px',
-    '--code-font-size': '14px',
-    '--code-line-height': '16px',
-    '--direction': 'ltr',
-    '--flex-row-direction': 'row',
-    '--flex-align': 'flex-end',
-    '--text-align': 'left'
-  };
-  constructor(initialStyle) {
-    this.style = initialStyle;
+class DateField extends BaseInputComponent {
+  constructor(text, ...classes) {
+    super(text, ["datefield"].concat(...classes));
   }
-  setTheme(newStyle) {
-    this.style = newStyle;
-    for (const key in this.style) {
-      if (this.style[key] !== '') {
-        WEB_CONTEXT.doc.documentElement.style.setProperty(key, this.style[key]);
-      }
-    }
+  getHtml() {
+    return `<input type="date" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
-  apply() {
-    this.setTheme(this.style);
+}
+
+class NumberField extends BaseInputComponent {
+  constructor(text, ...classes) {
+    super(text, ["numberfield"].concat(...classes));
+  }
+  getHtml() {
+    return `<input type="number" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+  }
+}
+
+class ColorField extends BaseInputComponent {
+  constructor(text, ...classes) {
+    super(text, ["colorfield"].concat(...classes));
+  }
+  getHtml() {
+    return `<input type="color" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
 class Scene extends Container {
-  constructor(route, title = "Scene", theme = Theme.DEFAULT) {
+  constructor(route, title = "Scene") {
     super(new BorderLayout(), "scene");
     this.title = title;
     this.id = route;
-    this.theme = new Theme(theme);
     this.hidden = true;
     this.classes.push('hidden');
   }
@@ -257,16 +320,15 @@ class Scene extends Container {
 }
 
 class SceneManager extends Container {
-  constructor(title = "Old-Fashioned", theme = Theme.DEFAULT) {
+  constructor(title = "Old-Fashioned") {
     super(new GridLayout(), "glass");
     this.id = 'glass';
-    this.theme = new Theme(theme);
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];
   }
   createScene(route, title) {
-    const newScene = new Scene(route, title, this.theme);
+    const newScene = new Scene(route, title);
     this.add(newScene);
     return newScene;
   }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+  <link rel="stylesheet" href="old-fashioned.css" />
+  <link async rel="icon" type="image/x-icon" href="old-fashioned.png">
+  <script src="old-fashioned.js"></script>
+  <script src="old-fashioned-forms.js"></script>
+  <script>
+    window.onload = () => {
+      const sceneManager = new SceneManager();
+      const orderScene = sceneManager.createScene('order', 'Old Fashioned Forms');
+      const testOrder = {
+        "shipDate": "2020-10-05",
+        "address": {
+          "name": "Jay M",
+          "line1": "116 N Main St",
+          "city": "New Bremen",
+          "region": "OH",
+          "country": "US",
+          "postalCode": "45869"
+        },
+        "batteries": [
+          {
+            "batteryModel": "VLA-123",
+            "quantity": "2",
+            "cover": "Yes"
+          },
+          {
+            "batteryModel": "VLI-3",
+            "quantity": "1",
+            "cover": "No"
+          }
+        ]
+      };
+      const testOrderEmpty ={};
+      orderScene.add(
+        new SubmissionForm('Order', (o) => console.log(o), 'Submit Order').addChildren(
+          new DateFormEntry('shipDate', testOrder.shipDate, 'Ship Date'),
+          new FormEntryGroup('address', testOrder.address, 'Address').addChildren(
+            new TextFormEntry('name', testOrder.address && testOrder.address.name, 'Name'),
+            new TextFormEntry('line1', testOrder.address && testOrder.address.line1, 'Line 1'),
+            new TextFormEntry('city', testOrder.address && testOrder.address.city, 'City'),
+            new TextFormEntry('region', testOrder.address && testOrder.address.region, 'Region'),
+            new TextFormEntry('country', testOrder.address && testOrder.address.country, 'Country'),
+            new TextFormEntry('postalCode', testOrder.address && testOrder.address.postalCode, 'Postal Code')
+          ),
+          new FormEntryGroupArray('batteries', testOrder.batteries, 'Batteries',
+            (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
+            .addChildren(
+              new TextFormEntry('batteryModel', item.batteryModel, 'Battery Model'),
+              new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Must be greater than 0', (val) => val < 1)),
+              new TextFormEntry('cover', item.cover, 'Cover')
+            ), 'Add Battery')
+        ).getComponent()
+        , Position.CENTER);
+
+      sceneManager.routeTo('order');
+    };
+  </script>
+  <style></style>
+</head>
+
+<body>
+  <div id="glass"></div>
+</body>
+
+</html>
