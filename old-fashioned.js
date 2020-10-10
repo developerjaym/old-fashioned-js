@@ -223,11 +223,11 @@ class DropdownList extends BaseInputComponent {
     arraySupplier.then(
       arr => {
         this.options = arr;
-        if(this.parent) {
+        if (this.parent) {
           this.parent.paint();
         }
       }
-     );
+    );
   }
   getHtml() {
     return `
@@ -307,7 +307,7 @@ class Scene extends Container {
   }
   open() {
     WEB_CONTEXT.doc.title = this.title;
-    this.classes.splice(this.classes.indexOf("hidden"), 1);
+    this.classes = this.classes.filter(cls => cls !== "hidden");
     this.hidden = false;
     this.paint();
   }
