@@ -326,6 +326,11 @@ class SceneManager extends Container {
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];
+
+    window.addEventListener('hashchange', (event) => {
+      // browser updates location, take that hash (sceneId) and route to it.
+      this.routeTo(location.hash.replace(/^#/, ''));
+    });
   }
   createScene(route, title) {
     const newScene = new Scene(route, title);

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="old-fashioned.png">
+    <script src="old-fashioned.js"></script>
+    <script src="old-fashioned-forms.js"></script>
+    <script src="old-fashioned-themes.js"></script>
+    <script>
+        const sceneManager = new SceneManager();
+        for (let i = 0; i < 10; i++) {
+            const scene = sceneManager.createScene(`scene-${i}`, `Scene ${i}`);
+            scene.add(new Label(`Welcome to scene ${i}`, FontSize.LARGE), Position.NORTH);
+
+            // Next button
+            if (i < 9) {
+                const nextButton = new Button("Next");
+                nextButton.addActionListener((e) => {
+                    sceneManager.routeTo(`scene-${i + 1}`);
+                });
+                scene.add(nextButton, Position.EAST);
+            }
+
+            // Previous Button
+            if (i > 0) {
+                const nextButton = new Button('Previous');
+                nextButton.addActionListener((e) => {
+                    sceneManager.routeTo(`scene-${i - 1}`);
+                });
+                scene.add(nextButton, Position.WEST);
+            }
+        }
+        sceneManager.routeTo('scene-0');
+    </script>
+    <style></style>
+</head>
+
+<body>
+    <div id="glass"></div>
+</body>
+
+</html>
