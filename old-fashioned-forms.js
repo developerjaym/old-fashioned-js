@@ -16,6 +16,12 @@ class StringValidators {
     static OF_LENGTH = (min, max) => new Validator(`Input must be between ${min} and ${max} characters.`, (val) => !val || val.length < min || val.length > max);
 }
 
+class DateValidators {
+    static BEFORE = (max) => new Validator(`Date must be before ${max}`, (val) => val && new Date(val) >= new Date(max));
+    static AFTER = (min) => new Validator(`Date must be after ${min}`, (val) => val && new Date(val) <= new Date(min));
+    static BETWEEN = (min, max) => new Validator(`Date must be between ${min} and ${max}`, (val) => val && (new Date(val) <= new Date(min) || new Date(val) >= new Date(max)));
+}
+
 class FormLayout extends Layout {
     constructor() {
         super(Layout.FORM_LAYOUT);
@@ -48,8 +54,8 @@ class BaseInputFormEntry extends BaseFormEntry {
         this.component = new Container(new GridLayout(2));
         this.inputComponent = inputComponent;
         this.inputComponent.addActionListener(v => this.getValidationErrors());
-        this.validationErrorsContainer = new Container(new GridLayout(1));
-        this.component.add(new Label(this.label).setFor(this.inputComponent)).add(this.inputComponent).add(this.validationErrorsContainer);
+        this.validationErrorsContainer = new Container(new GridLayout(1), 'full-width');
+        this.component.add(new Label(this.label, 'form-label').setFor(this.inputComponent)).add(this.inputComponent).add(this.validationErrorsContainer);
     }
     getValidationErrors() {
         this.validationErrorsContainer.removeAll();
@@ -98,7 +104,7 @@ class FormEntryGroup extends BaseFormEntry {
         super(key, value, label, ...validators);
         this.children = [];
         this.component = new Container(new GridLayout(1));
-        this.component.add(new Label(this.label));
+        // this.component.add(new Container(new GridLayout(2)).add(new Label(this.label, 'form-label')));
     }
     getValidationErrors() {
         const childErrors = this.children.filter(child => child.getValidationErrors().length > 0);
@@ -106,10 +112,13 @@ class FormEntryGroup extends BaseFormEntry {
     }
     addChildren(...formEntry) {
         this.component.removeAll();
-        this.component.add(new Label(this.label));
+        this.component.add(new Label(this.label, FontSize.SECOND_HEADER));
         this.children.push(...formEntry);
         this.children.forEach(
-            child => this.component.add(child.getComponent())
+            child => { 
+                this.component.add(child.getComponent()); 
+                //TODO listen to children for validation errors
+            }
         )
         return this;
     }
@@ -125,30 +134,30 @@ class FormEntryGroup extends BaseFormEntry {
 }
 
 class SubmissionForm extends FormEntryGroup {
-    constructor(label, listener, buttonLabel='Submit') {
+    constructor(label, listener, buttonLabel = 'Submit') {
         super('', {}, label);
         this.component = new Container(new FormLayout());
         this.listener = listener;
         this.submissionButton = new Button(buttonLabel);//, 'disabled');
         this.submissionButton.addActionListener((e) => this.submit());
         this.center = new Container(new GridLayout(1));
-        this.component.add(new Label(this.label, FontSize.LARGE), Position.NORTH)
+        this.component.add(new Label(this.label, FontSize.FIRST_HEADER), Position.NORTH)
             .add(this.submissionButton, Position.SOUTH).add(this.center, Position.CENTER);
     }
     submit() {
         const valid = this.children.reduce((pre, cur) => {
-            if(cur.getValidationErrors().length) {
+            if (cur.getValidationErrors().length) {
                 return false;
             }
-            if(!pre) {
+            if (!pre) {
                 return false;
             }
             return true;
         }, true);
-        if(!valid) {
+        if (!valid) {
             this.submissionButton.classes.push('disabled');
         }
-        else { 
+        else {
             this.submissionButton.classes.splice(this.submissionButton.classes.indexOf('disabled'), 1);
             this.listener(this.getObject());
         }
@@ -184,12 +193,12 @@ class FormEntryGroupArray extends FormEntryGroup {
             this.addChildren(this.formEntrySupplier({}, this.children.length + 1));
         });
         this.center = new Container(new GridLayout(1));
-        this.component.add(new Label(this.label), Position.NORTH)
+        this.component.add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
             .add(addInputButton, Position.SOUTH).add(this.center, Position.CENTER);
-        if(this.value && this.value.length) {
+        if (this.value && this.value.length) {
             this.value.forEach(item => this.addChildren(this.formEntrySupplier(item, this.children.length + 1)))
-        }   
-        
+        }
+
     }
     addChildren(...formEntry) {
         this.center.removeAll();

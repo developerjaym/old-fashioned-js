@@ -46,8 +46,9 @@ class BorderLayout extends Layout {
 
 class FontSize {
   static SMALL = "small-font";
-  static MEDIUM = "medium-font";
-  static LARGE = "large-font";
+  static FIRST_HEADER = "first-header";
+  static SECOND_HEADER = "second-header";
+  static THIRD_HEADER = "third-header";
 }
 
 class Controller {
@@ -103,7 +104,7 @@ class Container extends Component {
     this.counter = 0;
   }
   getHtml() {
-    let html = `<div class="${this.classes.join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
+    let html = `<div class="${this.classes.reverse().join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
     html += this.getInnerHtml();
     html += `</div>`;
     return html;
@@ -176,7 +177,7 @@ class ImageLabel extends Component {
     if (this.width) {
       heightWidth += `width: ${this.width}; `;
     }
-    return `<div class="${this.classes.join(" ")}" id="${this.id}" style="${heightWidth}; background-image: url(${this.src}); background-repeat: no-repeat; background-size: contain;"></div>`
+    return `<div class="${this.classes.reverse().join(" ")}" id="${this.id}" style="${heightWidth}; background-image: url(${this.src}); background-repeat: no-repeat; background-size: contain;"></div>`
   }
 }
 
@@ -187,7 +188,15 @@ class Label extends Component {
     this.for = '';
   }
   getHtml() {
-    return `<label ${this.for} class="${this.classes.join(" ")}"  id="${this.id}">${this.text}</label>`;
+    const element = WEB_CONTEXT.doc.createElement('label');
+    element.classList.add(...this.classes.reverse());
+    element.innerText = this.text;
+    element.setAttribute('id', this.id);
+    element.setAttribute('for', this.for);
+    return element.outerHTML;
+    //TODO switch other elements to using dom api
+
+    // return `<label ${this.for} class="${this.classes.reverse().join(" ")}"  id="${this.id}">${this.text}</label>`;
   }
   setFor(inputComponent) {
     this.for = `for="${inputComponent.id}"`;
@@ -231,13 +240,13 @@ class DropdownList extends BaseInputComponent {
   }
   getHtml() {
     return `
-    <input list="${this.id}list" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
+    <input list="${this.id}list" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
 
     <datalist id="${this.id}list">
       ${this.options.map(option => `<option value="${option}">`).join(" ")}
     </datalist>
     `
-    // return `<button class="${this.classes.join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+    // return `<button class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
   }
 }
 
@@ -248,7 +257,7 @@ class Button extends BaseInputComponent {
     ACTION_LISTENER_CONTEXT[`${this.id}`] = () => this.actionListeners.forEach(listener => listener());
   }
   getHtml() {
-    return `<button class="${this.classes.join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+    return `<button class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
   }
 }
 
@@ -257,7 +266,7 @@ class TextField extends BaseInputComponent {
     super(text, ["textfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="text" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input type="text" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -266,7 +275,7 @@ class TextArea extends BaseInputComponent {
     super(text, ["textarea"].concat(...classes));
   }
   getHtml() {
-    return `<textarea class="${this.classes.join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
+    return `<textarea class="${this.classes.reverse().join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
   }
 }
 
@@ -275,7 +284,7 @@ class DateField extends BaseInputComponent {
     super(text, ["datefield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="date" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input type="date" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -284,7 +293,7 @@ class NumberField extends BaseInputComponent {
     super(text, ["numberfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="number" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input type="number" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -293,7 +302,7 @@ class ColorField extends BaseInputComponent {
     super(text, ["colorfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="color" class="${this.classes.join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input type="color" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 

@@ -17,11 +17,11 @@
             const model = new Model();
             const orderController = new Controller(model);
             orderController.onSubmission = (o) => {
-                confirmationScreen.add(new TextArea(JSON.stringify(o, null, 2)), Position.CENTER).add(new Label('Confirmation', FontSize.LARGE), Position.NORTH);
+                confirmationScreen.add(new TextArea(JSON.stringify(o, null, 2)), Position.CENTER).add(new Label('Confirmation', FontSize.FIRST_HEADER), Position.NORTH);
                 sceneManager.routeTo('confirmation');
             };
             orderController.onSearchTermEntered = (term) =>
-                fetch('http://127.0.0.1:8080/test-order.json')
+                fetch('https://jayckers.com/old-fashioned/test-order.json')
                     .then(response => response.json())
                     .then(data => {
                         sceneManager.routeTo('order');
@@ -42,12 +42,12 @@
             orderScene.onUpdate = (updatedOrder) => {
                 orderScene.add(
                     new SubmissionForm('Order', (o) => orderController.onSubmission(o), 'Submit Order').addChildren(
-                        new DateFormEntry('shipDate', updatedOrder.shipDate, 'Ship Date'),
+                        new DateFormEntry('shipDate', updatedOrder.shipDate, 'Ship Date', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')),
                         ConvenientForms.ADDRESS_FORM_BUILDER(updatedOrder.address),
                         new FormEntryGroupArray('batteries', updatedOrder.batteries, 'Batteries',
                             (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
                                 .addChildren(
-                                    new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('http://127.0.0.1:8080/battery-models.json')
+                                    new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned//battery-models.json')
                     .then(response => response.json()), StringValidators.NOT_EMPTY),
                                     new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
                                     new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
@@ -56,7 +56,7 @@
                     , Position.CENTER);
             }
 
-            orderScene.add(new Label('Loading...', FontSize.LARGE), Position.CENTER);
+            orderScene.add(new Label('Loading...', FontSize.FIRST_HEADER), Position.CENTER);
 
             model.addObserver(orderScene);
 
