@@ -232,11 +232,11 @@ class DropdownList extends BaseInputComponent {
     arraySupplier.then(
       arr => {
         this.options = arr;
-        if(this.parent) {
+        if (this.parent) {
           this.parent.paint();
         }
       }
-     );
+    );
   }
   getHtml() {
     return `
@@ -316,7 +316,7 @@ class Scene extends Container {
   }
   open() {
     WEB_CONTEXT.doc.title = this.title;
-    this.classes.splice(this.classes.indexOf("hidden"), 1);
+    this.classes = this.classes.filter(cls => cls !== "hidden");
     this.hidden = false;
     this.paint();
   }
@@ -335,6 +335,11 @@ class SceneManager extends Container {
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];
+
+    window.addEventListener('hashchange', (event) => {
+      // browser updates location, take that hash (sceneId) and route to it.
+      this.routeTo(location.hash.replace(/^#/, ''));
+    });
   }
   createScene(route, title) {
     const newScene = new Scene(route, title);
