@@ -79,6 +79,9 @@ body {
   padding: var(--padding-thick);
   width: fit-content;
 }
+.textarea {
+  min-height: calc(12 * var(--main-font-size));
+}
 .form-label {
   text-align: right;
   width: inherit;

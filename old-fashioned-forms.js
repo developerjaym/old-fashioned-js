@@ -47,6 +47,9 @@ class BaseFormEntry {
     getComponent() {
         throw 'abstract base form entry';
     }
+    setDisabled(disabled) {
+        throw 'abstract base form entry';
+    }
 }
 class BaseInputFormEntry extends BaseFormEntry {
     constructor(key, value, label, inputComponent, ...validators) {
@@ -72,10 +75,19 @@ class BaseInputFormEntry extends BaseFormEntry {
     getComponent() {
         return this.component;
     }
+    setDisabled(disabled) {
+        this.inputComponent.setDisabled(disabled);
+        return this;
+    }
 }
 class TextFormEntry extends BaseInputFormEntry {
     constructor(key, value, label, ...validators) {
         super(key, value, label, new TextField(value || ''), ...validators);
+    }
+}
+class PasswordFormEntry extends BaseInputFormEntry {
+    constructor(key, value, label, ...validators) {
+        super(key, value, label, new PasswordField(value || ''), ...validators);
     }
 }
 class NumberFormEntry extends BaseInputFormEntry {
@@ -104,7 +116,6 @@ class FormEntryGroup extends BaseFormEntry {
         super(key, value, label, ...validators);
         this.children = [];
         this.component = new Container(new GridLayout(1));
-        // this.component.add(new Container(new GridLayout(2)).add(new Label(this.label, 'form-label')));
     }
     getValidationErrors() {
         const childErrors = this.children.filter(child => child.getValidationErrors().length > 0);
@@ -131,6 +142,10 @@ class FormEntryGroup extends BaseFormEntry {
     getComponent() {
         return this.component;
     }
+    setDisabled(disabled) {
+        this.children.forEach(child =>child.setDisabled(disabled));
+        return this;
+    }
 }
 
 class SubmissionForm extends FormEntryGroup {
@@ -155,10 +170,10 @@ class SubmissionForm extends FormEntryGroup {
             return true;
         }, true);
         if (!valid) {
-            this.submissionButton.classes.push('disabled');
+            // this.submissionButton.setDisabled(true);
         }
         else {
-            this.submissionButton.classes.splice(this.submissionButton.classes.indexOf('disabled'), 1);
+            // this.submissionButton.setDisabled(false);
             this.listener(this.getObject());
         }
         this.component.paint();
@@ -188,13 +203,13 @@ class FormEntryGroupArray extends FormEntryGroup {
         super(key, value, label, ...validators);
         this.formEntrySupplier = formEntrySupplier;
         this.component = new Container(new FormLayout());
-        const addInputButton = new Button(addLabel);
-        addInputButton.addActionListener((e) => {
+        this.addInputButton = new Button(addLabel);
+        this.addInputButton.addActionListener((e) => {
             this.addChildren(this.formEntrySupplier({}, this.children.length + 1));
         });
         this.center = new Container(new GridLayout(1));
         this.component.add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
-            .add(addInputButton, Position.SOUTH).add(this.center, Position.CENTER);
+            .add(this.addInputButton, Position.SOUTH).add(this.center, Position.CENTER);
         if (this.value && this.value.length) {
             this.value.forEach(item => this.addChildren(this.formEntrySupplier(item, this.children.length + 1)))
         }
@@ -216,5 +231,16 @@ class FormEntryGroupArray extends FormEntryGroup {
     }
     getComponent() {
         return this.component;
+    }
+    setDisabled(disabled) {
+        super.setDisabled(disabled);
+        this.addInputButton.setDisabled(disabled);
+        if(disabled) {
+            this.component.remove(this.addInputButton);
+        }
+        else {
+            this.component.add(this.addInputButton, Position.SOUTH);
+        }
+        return this;
     }
 }

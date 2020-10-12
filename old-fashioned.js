@@ -87,12 +87,17 @@ class Component extends Observer {
     this.classes = ["component"].concat(...classes);
     this.id = `${this.classes.reverse()[0]}${Math.floor(Math.random() * 1000000000)}`;
     this.parent = null;
+    this.attributes = {};
   }
   getHtml() {
     throw "NYI";
   }
   setParent(parentContainer) {
     this.parent = parentContainer;
+  }
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    return this;
   }
 }
 
@@ -102,6 +107,7 @@ class Container extends Component {
     this.layout = layout;
     this.components = {};
     this.counter = 0;
+    this.disabled = false;
   }
   getHtml() {
     let html = `<div class="${this.classes.reverse().join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
@@ -116,6 +122,19 @@ class Container extends Component {
       innerHTML += value.getHtml();
     }
     return innerHTML;
+  }
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    for (const key of Object.keys(this.components)) {
+      if (this.components[key]) {
+        this.components[key].setDisabled(disabled);
+      }
+    }
+    if (this.parent) {
+      this.parent.paint();
+    }
+    this.paint();
+    return this;
   }
   add(component, ...constraints) {
     switch (this.layout.type) {
@@ -211,17 +230,29 @@ class BaseInputComponent extends Component {
     this.actionListeners = [];
     ACTION_LISTENER_CONTEXT[`${this.id}`] = (e) => {
       this.value = e.target.value;
-      this.actionListeners.forEach(listener => listener(this.value));
+      this.actionListeners.forEach(listener => {
+        if (!this.disabled) {
+          listener(this.value);
+        }
+      });
     };
   }
   addActionListener(actionListener) {
     this.actionListeners.push(actionListener);
+    return this;
   }
   getValue() {
     return this.value;
   }
   getHtml() {
     throw 'abstract';
+  }
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    if (this.parent) {
+      this.parent.paint();
+    }
+    return this;
   }
 }
 
@@ -240,7 +271,7 @@ class DropdownList extends BaseInputComponent {
   }
   getHtml() {
     return `
-    <input list="${this.id}list" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
+    <input ${this.disabled ? 'disabled' : ''} list="${this.id}list" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
 
     <datalist id="${this.id}list">
       ${this.options.map(option => `<option value="${option}">`).join(" ")}
@@ -257,7 +288,7 @@ class Button extends BaseInputComponent {
     ACTION_LISTENER_CONTEXT[`${this.id}`] = () => this.actionListeners.forEach(listener => listener());
   }
   getHtml() {
-    return `<button class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+    return `<button ${this.disabled ? 'disabled' : ''} class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
   }
 }
 
@@ -266,7 +297,16 @@ class TextField extends BaseInputComponent {
     super(text, ["textfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="text" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${this.disabled ? 'disabled' : ''} type="text" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+  }
+}
+
+class PasswordField extends BaseInputComponent {
+  constructor(text, ...classes) {
+    super(text, ["password"].concat(...classes));
+  }
+  getHtml() {
+    return `<input ${this.disabled ? 'disabled' : ''} type="password" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -275,7 +315,7 @@ class TextArea extends BaseInputComponent {
     super(text, ["textarea"].concat(...classes));
   }
   getHtml() {
-    return `<textarea class="${this.classes.reverse().join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
+    return `<textarea ${this.disabled ? 'disabled' : ''} class="${this.classes.reverse().join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
   }
 }
 
@@ -284,7 +324,7 @@ class DateField extends BaseInputComponent {
     super(text, ["datefield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="date" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${this.disabled ? 'disabled' : ''} type="date" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -293,7 +333,7 @@ class NumberField extends BaseInputComponent {
     super(text, ["numberfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="number" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${this.disabled ? 'disabled' : ''} type="number" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 
@@ -302,7 +342,7 @@ class ColorField extends BaseInputComponent {
     super(text, ["colorfield"].concat(...classes));
   }
   getHtml() {
-    return `<input type="color" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${this.disabled ? 'disabled' : ''} type="color" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
   }
 }
 

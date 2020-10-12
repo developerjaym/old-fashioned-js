@@ -5,11 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="old-fashioned.css" />
-    <link async rel="icon" type="image/x-icon" href="old-fashioned.png">
-    <script src="old-fashioned.js"></script>
-    <script src="old-fashioned-forms.js"></script>
-    <script src="old-fashioned-convenience.js"></script>
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+    <script src="../old-fashioned-convenience.js"></script>
     <script>
         window.onload = () => {
 
@@ -21,13 +21,17 @@
                 sceneManager.routeTo('confirmation');
             };
             orderController.onSearchTermEntered = (term) =>
-                fetch('https://jayckers.com/old-fashioned/test-order.json')
+                fetch('https://jayckers.com/old-fashioned/examples/test-order.json')
                     .then(response => response.json())
                     .then(data => {
                         sceneManager.routeTo('order');
                         orderController.onModelUpdate(data);
                     });
 
+            const loginScene = sceneManager.createScene('login', 'Login').add(
+                ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search') && console.log(creds)).getComponent(),
+                Position.CENTER
+            );
 
             const searchScene = sceneManager.createScene('search', 'Old Fashioned Search').add(
                 new SubmissionForm(
@@ -35,7 +39,7 @@
                         new TextFormEntry('orderNumber', '', 'Order Number', new RegexValidator('Enter a 3-digit order number.', /[0-9]{3}/))
                     ).getComponent()
                 , Position.CENTER);
-            
+
 
             const orderScene = sceneManager.createScene('order', 'Old Fashioned Forms');
             const confirmationScreen = sceneManager.createScene('confirmation', 'Old Fashioned Confirmation');
@@ -43,12 +47,12 @@
                 orderScene.add(
                     new SubmissionForm('Order', (o) => orderController.onSubmission(o), 'Submit Order').addChildren(
                         new DateFormEntry('shipDate', updatedOrder.shipDate, 'Ship Date', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')),
-                        ConvenientForms.ADDRESS_FORM_BUILDER(updatedOrder.address),
+                        ConvenientForms.ADDRESS_FORM_BUILDER(updatedOrder.address).setDisabled(true),
                         new FormEntryGroupArray('batteries', updatedOrder.batteries, 'Batteries',
                             (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
                                 .addChildren(
-                                    new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned//battery-models.json')
-                    .then(response => response.json()), StringValidators.NOT_EMPTY),
+                                    new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned/examples/battery-models.json')
+                                        .then(response => response.json()), StringValidators.NOT_EMPTY),
                                     new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
                                     new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
                                 ), 'Add Battery')
@@ -60,7 +64,7 @@
 
             model.addObserver(orderScene);
 
-            sceneManager.routeTo('search');
+            sceneManager.routeTo('login');
         };
     </script>
 </head>
