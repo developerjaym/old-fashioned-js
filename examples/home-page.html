@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png" />
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+    <script src="../old-fashioned-convenience.js"></script>
+    <script>
+      window.onload = () => {
+        const sceneManager = new SceneManager();
+        const homeScene = sceneManager.createScene(
+          "home",
+          "Old Fashioned Documentation"
+        );
+        homeScene
+          .add(
+            new Container(new GridLayout(1))
+              .add(
+                ConvenientContainers.HEADER_CONTAINER_BUILDER(
+                  "Old-Fashioned.js",
+                  (e) => console.log("sign up"),
+                  (e) => console.log("sign in")
+                ),
+                Position.NORTH
+              )
+              .add(
+                ConvenientContainers.ARTICLE_BUILDER(
+                  "About",
+                  "Old-Fashioned.js is a new JS library that provides the best of both the old and the new worlds. You get a tidy component library combined with mobile-friendly layouts and routing.\nIf you don't love the development experience, we'll issue a full refund in 3 to 6 business days."
+                )
+              )
+              .add(
+                ConvenientContainers.ARTICLE_BUILDER(
+                  "But Why?",
+                  "Have you ever gotten frustrated with downloading 500 megs of npm modules just to get a 'Hello World' app in Angular?\nThat's why.\n" +
+                    "Have you ever gotten tired of managing CSS across a dozen files? Have you ever gotten tired of needing fifty technologies to solve a simple task?"
+                )
+              )
+              .add(
+                ConvenientContainers.ARTICLE_BUILDER(
+                  "What Components?",
+                  "Our ever-growing library includes labels, buttons, dropdowns, and more. We also provide extensive form support, including form groups, form arrays, validation, population, disabling, and more."
+                )
+              ),
+            Position.NORTH
+          )
+          .add(
+            ConvenientContainers.FOOTER_CONTAINER("Jay", 1990, 2020),
+            Position.SOUTH
+          );
+
+        sceneManager.routeTo("home");
+      };
+    </script>
+  </head>
+  <body>
+    <div id="glass"></div>
+  </body>
+</html>

@@ -1,8 +1,8 @@
 const ACTION_LISTENER_CONTEXT = {};
 
 const WEB_CONTEXT = {
-  doc: document
-}
+  doc: document,
+};
 
 class Position {
   static NORTH = "north";
@@ -17,12 +17,15 @@ class Layout {
   static FORM_LAYOUT = "form-layout";
   constructor(type) {
     this.type = type;
+    this.counter = 0;
   }
   getStyle() {
-    throw 'abstract layout';
+    throw "abstract layout";
+  }
+  add(newComponent, containerComponents, ...constraints) {
+    containerComponents[`${this.counter++}`] = newComponent;
   }
 }
-
 
 class GridLayout extends Layout {
   constructor(width) {
@@ -41,6 +44,10 @@ class BorderLayout extends Layout {
   }
   getStyle() {
     return ``;
+  }
+  add(newComponent, containerComponents, ...constraints) {
+    newComponent.classes.push(constraints[0]);
+    containerComponents[`${constraints[0]}`] = newComponent;
   }
 }
 
@@ -71,7 +78,7 @@ class Model {
   }
   onUpdate(newValue) {
     this.value = newValue;
-    this.observers.forEach(observer => observer.onUpdate(this.value));
+    this.observers.forEach((observer) => observer.onUpdate(this.value));
   }
 }
 
@@ -85,7 +92,9 @@ class Component extends Observer {
   constructor(...classes) {
     super();
     this.classes = ["component"].concat(...classes);
-    this.id = `${this.classes.reverse()[0]}${Math.floor(Math.random() * 1000000000)}`;
+    this.id = `${this.classes.reverse()[0]}${Math.floor(
+      Math.random() * 1000000000
+    )}`;
     this.parent = null;
     this.attributes = {};
   }
@@ -110,13 +119,15 @@ class Container extends Component {
     this.disabled = false;
   }
   getHtml() {
-    let html = `<div class="${this.classes.reverse().join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
+    let html = `<div class="${this.classes
+      .reverse()
+      .join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
     html += this.getInnerHtml();
     html += `</div>`;
     return html;
   }
   getInnerHtml() {
-    let innerHTML = '';
+    let innerHTML = "";
     for (const property in this.components) {
       const value = this.components[property];
       innerHTML += value.getHtml();
@@ -137,17 +148,7 @@ class Container extends Component {
     return this;
   }
   add(component, ...constraints) {
-    switch (this.layout.type) {
-      case Layout.FORM_LAYOUT:
-      case Layout.BORDER_LAYOUT:
-        component.classes.push(constraints[0]);
-        this.components[`${constraints[0]}`] = component;
-        break;
-      case Layout.GRID_LAYOUT:
-      default:
-        this.components[`${this.counter++}`] = component;
-        break;
-    }
+    this.layout.add(component, this.components, ...constraints);
     component.setParent(this);
     this.paint();
     return this;
@@ -155,7 +156,10 @@ class Container extends Component {
   remove(componentToRemove) {
     const newComponents = {};
     for (const key of Object.keys(this.components)) {
-      if (this.components[key] && this.components[key].id !== componentToRemove.id) {
+      if (
+        this.components[key] &&
+        this.components[key].id !== componentToRemove.id
+      ) {
         newComponents[key] = this.components[key];
       }
     }
@@ -189,14 +193,43 @@ class ImageLabel extends Component {
     this.height = height;
   }
   getHtml() {
-    let heightWidth = '';
+    let heightWidth = "";
     if (this.height) {
       heightWidth = `height: ${this.height}; `;
     }
     if (this.width) {
       heightWidth += `width: ${this.width}; `;
     }
-    return `<div class="${this.classes.reverse().join(" ")}" id="${this.id}" style="${heightWidth}; background-image: url(${this.src}); background-repeat: no-repeat; background-size: contain;"></div>`
+    return `<div class="${this.classes.reverse().join(" ")}" id="${
+      this.id
+    }" style="${heightWidth}; background-image: url(${
+      this.src
+    }); background-repeat: no-repeat; background-size: contain;"></div>`;
+  }
+}
+
+class LongText extends Component {
+  constructor(text, ...classes) {
+    super(["long-text"].concat(...classes));
+    this.text = text;
+  }
+  getHtml() {
+    const element = WEB_CONTEXT.doc.createElement("div");
+    element.classList.add(...this.classes.reverse());
+    element.appendChild;
+    this.text
+      .split("\n")
+      .map((p) => {
+        const paragraph = WEB_CONTEXT.doc.createElement("p");
+        paragraph.innerText = p;
+        return paragraph;
+      })
+      .forEach((p) => element.appendChild(p));
+    element.setAttribute("id", this.id);
+    return element.outerHTML;
+    //TODO switch other elements to using dom api
+
+    // return `<label ${this.for} class="${this.classes.reverse().join(" ")}"  id="${this.id}">${this.text}</label>`;
   }
 }
 
@@ -204,14 +237,14 @@ class Label extends Component {
   constructor(text, ...classes) {
     super(["label"].concat(...classes));
     this.text = text;
-    this.for = '';
+    this.for = "";
   }
   getHtml() {
-    const element = WEB_CONTEXT.doc.createElement('label');
+    const element = WEB_CONTEXT.doc.createElement("label");
     element.classList.add(...this.classes.reverse());
     element.innerText = this.text;
-    element.setAttribute('id', this.id);
-    element.setAttribute('for', this.for);
+    element.setAttribute("id", this.id);
+    element.setAttribute("for", this.for);
     return element.outerHTML;
     //TODO switch other elements to using dom api
 
@@ -226,11 +259,11 @@ class Label extends Component {
 class BaseInputComponent extends Component {
   constructor(value, ...classes) {
     super(["input-component"].concat(...classes));
-    this.value = value || '';
+    this.value = value || "";
     this.actionListeners = [];
     ACTION_LISTENER_CONTEXT[`${this.id}`] = (e) => {
       this.value = e.target.value;
-      this.actionListeners.forEach(listener => {
+      this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
           listener(this.value);
         }
@@ -245,7 +278,7 @@ class BaseInputComponent extends Component {
     return this.value;
   }
   getHtml() {
-    throw 'abstract';
+    throw "abstract";
   }
   setDisabled(disabled) {
     this.disabled = disabled;
@@ -260,23 +293,25 @@ class DropdownList extends BaseInputComponent {
   constructor(value, arraySupplier, ...classes) {
     super(value, ["dropdown"].concat(...classes));
     this.options = [];
-    arraySupplier.then(
-      arr => {
-        this.options = arr;
-        if (this.parent) {
-          this.parent.paint();
-        }
+    arraySupplier.then((arr) => {
+      this.options = arr;
+      if (this.parent) {
+        this.parent.paint();
       }
-    );
+    });
   }
   getHtml() {
     return `
-    <input ${this.disabled ? 'disabled' : ''} list="${this.id}list" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
+    <input ${this.disabled ? "disabled" : ""} list="${
+      this.id
+    }list" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
 
     <datalist id="${this.id}list">
-      ${this.options.map(option => `<option value="${option}">`).join(" ")}
+      ${this.options.map((option) => `<option value="${option}">`).join(" ")}
     </datalist>
-    `
+    `;
     // return `<button class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
   }
 }
@@ -285,10 +320,17 @@ class Button extends BaseInputComponent {
   constructor(value, ...classes) {
     super(value, ["button"].concat(...classes));
     this.actionListeners = [];
-    ACTION_LISTENER_CONTEXT[`${this.id}`] = () => this.actionListeners.forEach(listener => listener());
+    ACTION_LISTENER_CONTEXT[`${this.id}`] = () =>
+      this.actionListeners.forEach((listener) => listener());
   }
   getHtml() {
-    return `<button ${this.disabled ? 'disabled' : ''} class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+    return `<button ${
+      this.disabled ? "disabled" : ""
+    } class="${this.classes
+      .reverse()
+      .join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${
+      this.id
+    }">${this.value}</button>`;
   }
 }
 
@@ -297,7 +339,13 @@ class TextField extends BaseInputComponent {
     super(text, ["textfield"].concat(...classes));
   }
   getHtml() {
-    return `<input ${this.disabled ? 'disabled' : ''} type="text" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${
+      this.disabled ? "disabled" : ""
+    } type="text" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
+      this.id
+    }">`;
   }
 }
 
@@ -306,7 +354,13 @@ class PasswordField extends BaseInputComponent {
     super(text, ["password"].concat(...classes));
   }
   getHtml() {
-    return `<input ${this.disabled ? 'disabled' : ''} type="password" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${
+      this.disabled ? "disabled" : ""
+    } type="password" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
+      this.id
+    }">`;
   }
 }
 
@@ -315,7 +369,13 @@ class TextArea extends BaseInputComponent {
     super(text, ["textarea"].concat(...classes));
   }
   getHtml() {
-    return `<textarea ${this.disabled ? 'disabled' : ''} class="${this.classes.reverse().join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">${this.value}</textarea>`;
+    return `<textarea ${
+      this.disabled ? "disabled" : ""
+    } class="${this.classes
+      .reverse()
+      .join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${
+      this.id
+    }'](event)"  id="${this.id}">${this.value}</textarea>`;
   }
 }
 
@@ -324,7 +384,13 @@ class DateField extends BaseInputComponent {
     super(text, ["datefield"].concat(...classes));
   }
   getHtml() {
-    return `<input ${this.disabled ? 'disabled' : ''} type="date" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${
+      this.disabled ? "disabled" : ""
+    } type="date" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
+      this.id
+    }">`;
   }
 }
 
@@ -333,7 +399,13 @@ class NumberField extends BaseInputComponent {
     super(text, ["numberfield"].concat(...classes));
   }
   getHtml() {
-    return `<input ${this.disabled ? 'disabled' : ''} type="number" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${
+      this.disabled ? "disabled" : ""
+    } type="number" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
+      this.id
+    }">`;
   }
 }
 
@@ -342,7 +414,13 @@ class ColorField extends BaseInputComponent {
     super(text, ["colorfield"].concat(...classes));
   }
   getHtml() {
-    return `<input ${this.disabled ? 'disabled' : ''} type="color" class="${this.classes.reverse().join(" ")}" value="${this.value}" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${this.id}">`;
+    return `<input ${
+      this.disabled ? "disabled" : ""
+    } type="color" class="${this.classes.reverse().join(" ")}" value="${
+      this.value
+    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
+      this.id
+    }">`;
   }
 }
 
@@ -352,11 +430,11 @@ class Scene extends Container {
     this.title = title;
     this.id = route;
     this.hidden = true;
-    this.classes.push('hidden');
+    this.classes.push("hidden");
   }
   open() {
     WEB_CONTEXT.doc.title = this.title;
-    this.classes = this.classes.filter(cls => cls !== "hidden");
+    this.classes = this.classes.filter((cls) => cls !== "hidden");
     this.hidden = false;
     this.paint();
   }
@@ -371,14 +449,14 @@ class Scene extends Container {
 class SceneManager extends Container {
   constructor(title = "Old-Fashioned") {
     super(new GridLayout(), "glass");
-    this.id = 'glass';
+    this.id = "glass";
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];
 
-    window.addEventListener('hashchange', (event) => {
+    window.addEventListener("hashchange", (event) => {
       // browser updates location, take that hash (sceneId) and route to it.
-      this.routeTo(location.hash.replace(/^#/, ''));
+      this.routeTo(location.hash.replace(/^#/, ""));
     });
   }
   createScene(route, title) {
@@ -398,7 +476,11 @@ class SceneManager extends Container {
     this.routeTo(this.previousRoutes.shift().id);
   }
   routeTo(sceneId) {
-    if (this.routes[sceneId] && this.currentRoute && this.currentRoute.id === sceneId) {
+    if (
+      this.routes[sceneId] &&
+      this.currentRoute &&
+      this.currentRoute.id === sceneId
+    ) {
       this.previousRoutes.unshift(this.routes[sceneId]); // so we can go back to it later
     }
 
@@ -407,8 +489,7 @@ class SceneManager extends Container {
         this.routes[id].open();
         this.currentRoute = this.routes[id];
         window.location.href = "#" + id;
-      }
-      else if (this.routes[id] && sceneId !== id) {
+      } else if (this.routes[id] && sceneId !== id) {
         this.routes[id].close();
       }
     }

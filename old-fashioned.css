@@ -1,10 +1,10 @@
 :root {
   /*Only for container backgrounds that should match the page background*/
-  --main-bg-color: rgba(244, 244, 244, 1); 
+  --main-bg-color: rgba(244, 244, 244, 1);
   --main-fg-color: rgb(9, 9, 9);
 
   /*For control and component backgrounds*/
-  --secondary-bg-color: rgb(244, 244, 244); 
+  --secondary-bg-color: rgb(244, 244, 244);
   --secondary-fg-color: rgb(9, 9, 9);
 
   --accent-bg-color: rgb(76, 49, 142);
@@ -45,17 +45,21 @@ body {
 }
 .container {
   display: grid;
+  /* height: 100%; */
+  /* width: 100%; */
+  background-color: var(--main-bg-color);
 }
 .full-width {
   grid-column-start: 1;
   grid-column-end: none;
+  height: fit-content;
 }
 .component {
   width: 100%;
   box-sizing: border-box;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   justify-self: center;
-  align-self: center;
+  align-self: start;
   font-size: var(--main-font-size);
   overflow-wrap: anywhere;
 }
@@ -74,10 +78,16 @@ body {
   border-style: solid;
 }
 
-.label, .button {
+.label,
+.button {
   text-align: center;
   padding: var(--padding-thick);
   width: fit-content;
+}
+.long-text {
+  max-width: 600px;
+  padding-top: var(--padding-thick);
+  padding-bottom: var(--padding-thick);
 }
 .textarea {
   min-height: calc(12 * var(--main-font-size));
@@ -87,7 +97,7 @@ body {
   width: inherit;
 }
 .invalid {
-  color: var(--error-fg-color)
+  color: var(--error-fg-color);
 }
 .button {
   background-color: var(--accent-bg-color);
@@ -98,22 +108,7 @@ body {
   border-width: var(--border-width-thin);
   border-style: solid;
 }
-.disabled {
-  color: var(--error-fg-color);
-  background-color: var(--accent-fg-color);
 
-  border-color: var(--error-fg-color);
-  border-width: var(--border-width-thin);
-  border-style: solid;
-}
-.button:hover {
-  color: var(--accent-bg-color);
-  background-color: var(--accent-fg-color);
-
-  border-color: var(--accent-bg-color);
-  border-width: var(--border-width-thin);
-  border-style: solid;
-}
 .border-layout {
   display: grid;
   /* grid-template-columns: max-content minmax(100px, calc(100vw - var(--padding-thick))) max-content; */
@@ -164,4 +159,36 @@ body {
 }
 .hidden {
   display: none;
+}
+.striped {
+  min-height: 33vh;
+}
+.striped:nth-child(odd),
+.striped:nth-child(odd) * {
+  background-color: var(--accent-bg-color);
+  color: var(--accent-fg-color);
+}
+.button.ghost {
+  color: var(--error-fg-color);
+  background-color: var(--accent-fg-color);
+
+  border-color: var(--error-fg-color);
+  border-width: var(--border-width-thin);
+  border-style: solid;
+}
+.disabled {
+  color: var(--error-fg-color);
+  background-color: var(--accent-fg-color);
+
+  border-color: var(--error-fg-color);
+  border-width: var(--border-width-thin);
+  border-style: solid;
+}
+.button:hover {
+  color: var(--accent-bg-color);
+  background-color: var(--accent-fg-color);
+
+  border-color: var(--accent-bg-color);
+  border-width: var(--border-width-thin);
+  border-style: solid;
 }
