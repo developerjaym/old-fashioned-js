@@ -8,6 +8,5 @@
 10. More mobile-friendliness, more responsive layouts
    A collapsing side panel
 11. The 'theme' and the css code aren't very integrated yet.
-12. Wizards
 13. Grid/Table
 */

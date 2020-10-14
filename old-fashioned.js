@@ -1,3 +1,8 @@
+class CommonClasses {
+  static INVALID = "invalid";
+  static DISABLED = "disabled";
+  static HIDDEN = "hidden";
+}
 const ACTION_LISTENER_CONTEXT = {};
 
 const WEB_CONTEXT = {
@@ -302,7 +307,7 @@ class DropdownList extends BaseInputComponent {
   }
   getHtml() {
     return `
-    <input ${this.disabled ? "disabled" : ""} list="${
+    <input ${this.disabled ? CommonClasses.DISABLED : ""} list="${
       this.id
     }list" class="${this.classes.reverse().join(" ")}" value="${
       this.value
@@ -325,7 +330,7 @@ class Button extends BaseInputComponent {
   }
   getHtml() {
     return `<button ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } class="${this.classes
       .reverse()
       .join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${
@@ -340,7 +345,7 @@ class TextField extends BaseInputComponent {
   }
   getHtml() {
     return `<input ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } type="text" class="${this.classes.reverse().join(" ")}" value="${
       this.value
     }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
@@ -355,7 +360,7 @@ class PasswordField extends BaseInputComponent {
   }
   getHtml() {
     return `<input ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } type="password" class="${this.classes.reverse().join(" ")}" value="${
       this.value
     }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
@@ -370,7 +375,7 @@ class TextArea extends BaseInputComponent {
   }
   getHtml() {
     return `<textarea ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } class="${this.classes
       .reverse()
       .join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${
@@ -400,7 +405,7 @@ class NumberField extends BaseInputComponent {
   }
   getHtml() {
     return `<input ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } type="number" class="${this.classes.reverse().join(" ")}" value="${
       this.value
     }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
@@ -415,7 +420,7 @@ class ColorField extends BaseInputComponent {
   }
   getHtml() {
     return `<input ${
-      this.disabled ? "disabled" : ""
+      this.disabled ? CommonClasses.DISABLED : ""
     } type="color" class="${this.classes.reverse().join(" ")}" value="${
       this.value
     }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
@@ -430,18 +435,18 @@ class Scene extends Container {
     this.title = title;
     this.id = route;
     this.hidden = true;
-    this.classes.push("hidden");
+    this.classes.push(CommonClasses.HIDDEN);
   }
   open() {
     WEB_CONTEXT.doc.title = this.title;
-    this.classes = this.classes.filter((cls) => cls !== "hidden");
+    this.classes = this.classes.filter((cls) => cls !== CommonClasses.HIDDEN);
     this.hidden = false;
     this.paint();
   }
   close() {
     this.hidden = true;
-    if (!this.classes.includes("hidden")) {
-      this.classes.push("hidden");
+    if (!this.classes.includes(CommonClasses.HIDDEN)) {
+      this.classes.push(CommonClasses.HIDDEN);
     }
   }
 }

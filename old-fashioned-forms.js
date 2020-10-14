@@ -25,10 +25,8 @@ class StringValidators {
 }
 
 class ArrayValidators {
-  static NOT_EMPTY = new Validator("Required", (val) => {
-    console.log('val', val);
-    return !val || !JSON.parse(val).length;
-  }
+  static NOT_EMPTY = new Validator("Required", (val) =>
+    !val || !JSON.parse(val).length
   );
 }
 

@@ -1,19 +1,3 @@
-//composite pattern again?
-//chain of responsibility? Something has to determine if the wizard is done
-/*
-
-Wizard
--accumulator
--starting fork
-
-Fork
--name/id
--form
--routing function (take in input and output name/id of next fork)
--done function? The wizard needs some way to know it's at a terminus
-
-*/
-
 class WizardFork extends Model {
     constructor(name, component, evaluator) {
         this.name = name;
