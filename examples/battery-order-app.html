@@ -12,7 +12,6 @@
     <script src="../old-fashioned-convenience.js"></script>
     <script>
         window.onload = () => {
-
             const sceneManager = new SceneManager();
             const model = new Model();
             const orderController = new Controller(model);
@@ -55,7 +54,7 @@
                                         .then(response => response.json()), StringValidators.NOT_EMPTY),
                                     new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
                                     new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
-                                ), 'Add Battery')
+                                ), 'Add Battery', ArrayValidators.NOT_EMPTY)
                     ).getComponent()
                     , Position.CENTER);
             }

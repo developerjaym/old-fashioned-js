@@ -24,6 +24,14 @@ class StringValidators {
     );
 }
 
+class ArrayValidators {
+  static NOT_EMPTY = new Validator("Required", (val) => {
+    console.log('val', val);
+    return !val || !JSON.parse(val).length;
+  }
+  );
+}
+
 class DateValidators {
   static BEFORE = (max) =>
     new Validator(
@@ -63,6 +71,7 @@ class BaseFormEntry {
     this.value = value;
     this.label = label;
     this.validators = [].concat(...validators);
+    this.actionListeners = [];
   }
   getValidationErrors() {
     return this.validators.filter((validator) =>
@@ -78,13 +87,19 @@ class BaseFormEntry {
   setDisabled(disabled) {
     throw "abstract base form entry";
   }
+  addActionListener(listener) {
+    this.actionListeners.push(listener);
+  }
 }
 class BaseInputFormEntry extends BaseFormEntry {
   constructor(key, value, label, inputComponent, ...validators) {
     super(key, value, label, ...validators);
     this.component = new Container(new GridLayout(2));
     this.inputComponent = inputComponent;
-    this.inputComponent.addActionListener((v) => this.getValidationErrors());
+    this.inputComponent.addActionListener((v) => {
+      this.getValidationErrors();
+      this.actionListeners.forEach(listener => listener(v));
+    });
     this.validationErrorsContainer = new Container(
       new GridLayout(1),
       "full-width"
@@ -106,7 +121,7 @@ class BaseInputFormEntry extends BaseFormEntry {
     return this.inputComponent.getValue();
   }
   getObject() {
-    return `"${this.key}": "${this.getValue()}"`;
+    return `"${this.key}": ${this.getValue() ? `"${this.getValue()}"` : null}`;
   }
   getComponent() {
     return this.component;
@@ -157,22 +172,35 @@ class FormEntryGroup extends BaseFormEntry {
     super(key, value, label, ...validators);
     this.children = [];
     this.component = new Container(new GridLayout(1));
+    this.validationErrorsContainer = new Container(
+      new GridLayout(1)
+    );
+  }
+  getGroupLevelValidationErrors() {
+    this.validationErrorsContainer.removeAll();
+    const validationErrors = super.getValidationErrors();
+    validationErrors.forEach((error) =>
+      this.validationErrorsContainer.add(new Label(error.label, "invalid"))
+    );
+    return validationErrors;
   }
   getValidationErrors() {
+    const validationErrors = this.getGroupLevelValidationErrors();
     const childErrors = this.children.filter(
       (child) => child.getValidationErrors().length > 0
     );
     return childErrors.concat(
-      this.validators.filter((validator) => validator.invalid(this.getValue()))
+      validationErrors
     );
   }
   addChildren(...formEntry) {
     this.component.removeAll();
     this.component.add(new Label(this.label, FontSize.SECOND_HEADER));
+    this.component.add(this.validationErrorsContainer);
     this.children.push(...formEntry);
     this.children.forEach((child) => {
       this.component.add(child.getComponent());
-      //TODO listen to children for validation errors
+      child.addActionListener(v => this.getGroupLevelValidationErrors());
     });
     return this;
   }
@@ -259,7 +287,9 @@ class FormEntryGroupArray extends FormEntryGroup {
     });
     this.center = new Container(new GridLayout(1));
     this.component
-      .add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
+      .add(new Container()
+        .add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
+        .add(this.validationErrorsContainer, Position.CENTER), Position.NORTH)
       .add(this.addInputButton, Position.SOUTH)
       .add(this.center, Position.CENTER);
     if (this.value && this.value.length) {
@@ -270,8 +300,12 @@ class FormEntryGroupArray extends FormEntryGroup {
   }
   addChildren(...formEntry) {
     this.center.removeAll();
+    this.validationErrorsContainer.removeAll();
     this.children.push(...formEntry);
-    this.children.forEach((child) => this.center.add(child.getComponent()));
+    this.children.forEach((child) => {
+      this.center.add(child.getComponent());
+      child.addActionListener(v => this.getGroupLevelValidationErrors());
+    });
     return this;
   }
   getValue() {

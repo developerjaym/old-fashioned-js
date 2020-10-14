@@ -1,15 +1,13 @@
 /*
-1. Article component
 2. Navigation component
-3. Back button should take user to previous route
-4. Builder pattern for components
-5. Form functionality
-  FormGroup: for something like an inner object like 'address'
-  FormArray: for something like an inner array like 'tags' or 'orders'
 6. Modals/Popups
 7. Pre-built containers/forms/scenes for common use cases
 8. More input types
-9. A better set of examples. I want an app that has three routes: 'sign up form', 'about us article', and 'todo list'.
+   Range
+   Times
 10. More mobile-friendliness, more responsive layouts
+   A collapsing side panel
 11. The 'theme' and the css code aren't very integrated yet.
+12. Wizards
+13. Grid/Table
 */
