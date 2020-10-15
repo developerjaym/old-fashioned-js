@@ -26,7 +26,7 @@ class StringValidators {
 
 class ArrayValidators {
   static NOT_EMPTY = new Validator("Required", (val) => {
-    !val || !JSON.parse(val).length;
+    return !val || !JSON.parse(val).length;
   }
   );
 }
@@ -174,6 +174,17 @@ class FormEntryGroup extends BaseFormEntry {
     this.validationErrorsContainer = new Container(
       new GridLayout(1)
     );
+    this.removableGroup = false;
+    this.onRemoval = () => { };
+    this.removeButton = new Button("Remove", CommonClasses.WARNING).addActionListener((e) => this.onRemoval());
+  }
+  addRemovalListener(removalListener) {
+    this.onRemoval = removalListener;
+    return this;
+  }
+  removable() {
+    this.removableGroup = true;
+    return this;
   }
   getGroupLevelValidationErrors() {
     this.validationErrorsContainer.removeAll();
@@ -194,7 +205,19 @@ class FormEntryGroup extends BaseFormEntry {
   }
   addChildren(...formEntry) {
     this.component.removeAll();
-    this.component.add(new Label(this.label, FontSize.SECOND_HEADER));
+    if (this.removableGroup) {
+      this.component.add(new Container().add(
+        new Label(this.label, FontSize.SECOND_HEADER), Position.CENTER
+        )
+        .add(
+          this.removeButton, Position.SOUTH
+        )
+      );
+    }
+    else {
+      this.component.add(new Label(this.label, FontSize.SECOND_HEADER));
+
+    }
     this.component.add(this.validationErrorsContainer);
     this.children.push(...formEntry);
     this.children.forEach((child) => {
@@ -223,7 +246,7 @@ class SubmissionForm extends FormEntryGroup {
     super("", {}, label);
     this.component = new Container(new FormLayout());
     this.listener = listener;
-    this.submissionButton = new Button(buttonLabel); //, 'disabled');
+    this.submissionButton = new Button(buttonLabel);
     this.submissionButton.addActionListener((e) => this.submit());
     this.center = new Container(new GridLayout(1));
     this.component
@@ -241,13 +264,10 @@ class SubmissionForm extends FormEntryGroup {
       }
       return true;
     }, true);
-    if (!valid) {
-      // this.submissionButton.setDisabled(true);
-    } else {
-      // this.submissionButton.setDisabled(false);
+
+    if (valid) {
       this.listener(this.getObject());
     }
-    // this.component.paint();
   }
   addChildren(...formEntry) {
     this.center.removeAll();
@@ -282,7 +302,11 @@ class FormEntryGroupArray extends FormEntryGroup {
     this.component = new Container(new FormLayout());
     this.addInputButton = new Button(addLabel);
     this.addInputButton.addActionListener((e) => {
-      this.addChildren(this.formEntrySupplier({}, this.children.length + 1));
+      const childGroup = this.formEntrySupplier({}, this.children.length + 1);
+      childGroup.addRemovalListener(() => {
+        this.removeChild(childGroup);
+      });
+      this.addChildren(childGroup);
     });
     this.center = new Container(new GridLayout(1));
     this.component
@@ -296,6 +320,15 @@ class FormEntryGroupArray extends FormEntryGroup {
         this.addChildren(this.formEntrySupplier(item, this.children.length + 1))
       );
     }
+  }
+  removeChild(formEntry) {
+    this.center.removeAll();
+    this.validationErrorsContainer.removeAll();
+    this.children.splice(this.children.indexOf(formEntry), 1);
+    this.children.forEach((child) => {
+      this.center.add(child.getComponent());
+      child.addActionListener(v => this.getGroupLevelValidationErrors());
+    });
   }
   addChildren(...formEntry) {
     this.center.removeAll();

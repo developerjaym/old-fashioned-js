@@ -28,7 +28,7 @@
                     });
 
             const loginScene = sceneManager.createScene('login', 'Login').add(
-                ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search') && console.log(creds)).getComponent(),
+                ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search')).getComponent(),
                 Position.CENTER
             );
 

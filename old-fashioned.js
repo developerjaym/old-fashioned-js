@@ -2,6 +2,7 @@ class CommonClasses {
   static INVALID = "invalid";
   static DISABLED = "disabled";
   static HIDDEN = "hidden";
+  static WARNING = "warning";
 }
 const ACTION_LISTENER_CONTEXT = {};
 
@@ -117,10 +118,7 @@ class Component extends Observer {
   }
   addClasses(...classes) {
     this.classes.push(...classes);
-    if (this.element) {
-      //TODO remove 'if' after all components are updated to bridge html elements TODO
-      this.element.classList.add(...classes.reverse());
-    }
+    this.element.classList.add(...classes.reverse());
   }
 
   removeClass(classToRemove) {
@@ -278,6 +276,7 @@ class BaseInputComponent extends Component {
   }
   setDisabled(disabled) {
     this.disabled = disabled;
+    this.element.disabled = disabled;
     return this;
   }
 }
@@ -299,10 +298,15 @@ class DropdownList extends BaseInputComponent {
     this.datalistElement = WEB_CONTEXT.doc.createElement("datalist");
     this.datalistElement.setAttribute('id', `${this.id}list`);
 
-    const inputElement = this.element;
+    this.inputElement = this.element;
     this.element = WEB_CONTEXT.doc.createElement("div");
-    this.element.appendChild(inputElement);
+    this.element.appendChild(this.inputElement);
     this.element.appendChild(this.datalistElement); 
+  }
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    this.inputElement.disabled = disabled;
+    return this;
   }
 }
 
@@ -399,7 +403,7 @@ class SceneManager extends Container {
     super(new GridLayout(), "glass");
     this.id = "glass";
     this.element = WEB_CONTEXT.doc.getElementById('glass');
-    WEB_CONTEXT.doc.title = title;
+    WEB_CONTEXT.doc.title = this.title;
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];

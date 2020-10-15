@@ -29,11 +29,6 @@
                         orderController.onModelUpdate(data);
                     });
 
-            // const loginScene = sceneManager.createScene('login', 'Login').add(
-            //     ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search') && console.log(creds)).getComponent(),
-            //     Position.CENTER
-            // );
-
 
             const orderScene = sceneManager.createScene('order', 'Old Fashioned Forms');
             const confirmationScreen = sceneManager.createScene('confirmation', 'Old Fashioned Confirmation');
@@ -43,7 +38,7 @@
                     new DateFormEntry('shipDate', '', 'Ship Date', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')),
                     ConvenientForms.ADDRESS_FORM_BUILDER(),
                     new FormEntryGroupArray('batteries', [], 'Batteries',
-                        (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
+                        (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter).removable()
                             .addChildren(
                                 new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned/examples/battery-models.json')
                                     .then(response => response.json()), StringValidators.NOT_EMPTY),

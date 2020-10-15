@@ -50,10 +50,7 @@ class WizardForm extends FormEntryGroup {
             }
             return true;
         }, true);
-        if (!valid) {
-            // this.submissionButton.setDisabled(true);
-        } else {
-            // this.submissionButton.setDisabled(false);
+        if (valid) {
             this.onSubmit(this.getObject());
         }
     }

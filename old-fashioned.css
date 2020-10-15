@@ -176,19 +176,19 @@ body {
   border-width: var(--border-width-thin);
   border-style: solid;
 }
-.disabled {
-  color: var(--error-fg-color);
-  background-color: var(--accent-fg-color);
-
-  border-color: var(--error-fg-color);
-  border-width: var(--border-width-thin);
-  border-style: solid;
-}
 .button:hover {
   color: var(--accent-bg-color);
   background-color: var(--accent-fg-color);
 
   border-color: var(--accent-bg-color);
+  border-width: var(--border-width-thin);
+  border-style: solid;
+}
+.warning {
+  color: var(--error-fg-color);
+  background-color: var(--accent-fg-color);
+
+  border-color: var(--error-fg-color);
   border-width: var(--border-width-thin);
   border-style: solid;
 }
