@@ -7,6 +7,7 @@ const ACTION_LISTENER_CONTEXT = {};
 
 const WEB_CONTEXT = {
   doc: document,
+  window: window
 };
 
 class Position {
@@ -51,7 +52,7 @@ class BorderLayout extends Layout {
     return ``;
   }
   add(newComponent, containerComponents, ...constraints) {
-    newComponent.classes.push(constraints[0]);
+    newComponent.addClasses(constraints[0]);
     containerComponents[`${constraints[0]}`] = newComponent;
   }
 }
@@ -102,16 +103,30 @@ class Component extends Observer {
     )}`;
     this.parent = null;
     this.attributes = {};
-  }
-  getHtml() {
-    throw "NYI";
+    this.element = null;
   }
   setParent(parentContainer) {
     this.parent = parentContainer;
   }
   setDisabled(disabled) {
     this.disabled = disabled;
+    if (this.element) {
+      this.addClasses(CommonClasses.DISABLED);
+    }
     return this;
+  }
+  addClasses(...classes) {
+    this.classes.push(...classes);
+    if (this.element) {
+      //TODO remove 'if' after all components are updated to bridge html elements TODO
+      this.element.classList.add(...classes.reverse());
+    }
+  }
+
+  removeClass(classToRemove) {
+    if (this.element) {
+      this.element.classList.remove(classToRemove);
+    }
   }
 }
 
@@ -122,23 +137,13 @@ class Container extends Component {
     this.components = {};
     this.counter = 0;
     this.disabled = false;
+
+    this.element = WEB_CONTEXT.doc.createElement("div");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.setAttribute("id", this.id);
+    this.element.style.cssText += this.layout.getStyle();
   }
-  getHtml() {
-    let html = `<div class="${this.classes
-      .reverse()
-      .join(" ")}" style="${this.layout.getStyle()}" id="${this.id}">`;
-    html += this.getInnerHtml();
-    html += `</div>`;
-    return html;
-  }
-  getInnerHtml() {
-    let innerHTML = "";
-    for (const property in this.components) {
-      const value = this.components[property];
-      innerHTML += value.getHtml();
-    }
-    return innerHTML;
-  }
+ 
   setDisabled(disabled) {
     this.disabled = disabled;
     for (const key of Object.keys(this.components)) {
@@ -146,16 +151,14 @@ class Container extends Component {
         this.components[key].setDisabled(disabled);
       }
     }
-    if (this.parent) {
-      this.parent.paint();
-    }
-    this.paint();
     return this;
   }
   add(component, ...constraints) {
     this.layout.add(component, this.components, ...constraints);
     component.setParent(this);
-    this.paint();
+    if (component.element) {
+      this.element.appendChild(component.element);
+    }
     return this;
   }
   remove(componentToRemove) {
@@ -170,23 +173,22 @@ class Container extends Component {
     }
     componentToRemove.setParent(null);
     this.components = newComponents;
-    this.paint();
+    if (componentToRemove.element && this.element.contains(componentToRemove.element)) {
+      this.element.removeChild(componentToRemove.element);
+    }
     return this;
   }
   removeAll() {
     for (const key of Object.keys(this.components)) {
       if (this.components[key]) {
         this.components[key].setParent(null);
+        if (this.components[key].element) {
+          this.element.removeChild(this.components[key].element);
+        }
       }
     }
     this.components = {};
-    this.paint();
     return this;
-  }
-  paint() {
-    if (WEB_CONTEXT.doc.getElementById(this.id)) {
-      WEB_CONTEXT.doc.getElementById(this.id).innerHTML = this.getInnerHtml();
-    }
   }
 }
 
@@ -196,8 +198,8 @@ class ImageLabel extends Component {
     this.src = src;
     this.width = width;
     this.height = height;
-  }
-  getHtml() {
+    this.element = WEB_CONTEXT.doc.createElement("div");
+    this.element.classList.add(...this.classes.reverse());
     let heightWidth = "";
     if (this.height) {
       heightWidth = `height: ${this.height}; `;
@@ -205,11 +207,10 @@ class ImageLabel extends Component {
     if (this.width) {
       heightWidth += `width: ${this.width}; `;
     }
-    return `<div class="${this.classes.reverse().join(" ")}" id="${
-      this.id
-    }" style="${heightWidth}; background-image: url(${
-      this.src
-    }); background-repeat: no-repeat; background-size: contain;"></div>`;
+    this.element.style.cssText += heightWidth + `; background-image: url(${this.src
+      }); background-repeat: no-repeat; background-size: contain;`;
+
+    this.element.setAttribute("id", this.id);
   }
 }
 
@@ -217,11 +218,9 @@ class LongText extends Component {
   constructor(text, ...classes) {
     super(["long-text"].concat(...classes));
     this.text = text;
-  }
-  getHtml() {
-    const element = WEB_CONTEXT.doc.createElement("div");
-    element.classList.add(...this.classes.reverse());
-    element.appendChild;
+    this.element = WEB_CONTEXT.doc.createElement("div");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.appendChild;
     this.text
       .split("\n")
       .map((p) => {
@@ -229,12 +228,8 @@ class LongText extends Component {
         paragraph.innerText = p;
         return paragraph;
       })
-      .forEach((p) => element.appendChild(p));
-    element.setAttribute("id", this.id);
-    return element.outerHTML;
-    //TODO switch other elements to using dom api
-
-    // return `<label ${this.for} class="${this.classes.reverse().join(" ")}"  id="${this.id}">${this.text}</label>`;
+      .forEach((p) => this.element.appendChild(p));
+    this.element.setAttribute("id", this.id);
   }
 }
 
@@ -243,17 +238,11 @@ class Label extends Component {
     super(["label"].concat(...classes));
     this.text = text;
     this.for = "";
-  }
-  getHtml() {
-    const element = WEB_CONTEXT.doc.createElement("label");
-    element.classList.add(...this.classes.reverse());
-    element.innerText = this.text;
-    element.setAttribute("id", this.id);
-    element.setAttribute("for", this.for);
-    return element.outerHTML;
-    //TODO switch other elements to using dom api
-
-    // return `<label ${this.for} class="${this.classes.reverse().join(" ")}"  id="${this.id}">${this.text}</label>`;
+    this.element = WEB_CONTEXT.doc.createElement("label");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.innerText = this.text;
+    this.element.setAttribute("id", this.id);
+    this.element.setAttribute("for", this.for);
   }
   setFor(inputComponent) {
     this.for = `for="${inputComponent.id}"`;
@@ -266,14 +255,19 @@ class BaseInputComponent extends Component {
     super(["input-component"].concat(...classes));
     this.value = value || "";
     this.actionListeners = [];
-    ACTION_LISTENER_CONTEXT[`${this.id}`] = (e) => {
+
+    this.element = WEB_CONTEXT.doc.createElement("input");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.setAttribute("id", this.id);
+    this.element.value = this.value;
+    this.element.addEventListener("input", (e) => {
       this.value = e.target.value;
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
           listener(this.value);
         }
       });
-    };
+    });
   }
   addActionListener(actionListener) {
     this.actionListeners.push(actionListener);
@@ -282,14 +276,8 @@ class BaseInputComponent extends Component {
   getValue() {
     return this.value;
   }
-  getHtml() {
-    throw "abstract";
-  }
   setDisabled(disabled) {
     this.disabled = disabled;
-    if (this.parent) {
-      this.parent.paint();
-    }
     return this;
   }
 }
@@ -300,24 +288,21 @@ class DropdownList extends BaseInputComponent {
     this.options = [];
     arraySupplier.then((arr) => {
       this.options = arr;
-      if (this.parent) {
-        this.parent.paint();
-      }
+      this.options.forEach(option => {
+        const optionElement =  WEB_CONTEXT.doc.createElement("option");
+        optionElement.value = option;
+        this.datalistElement.appendChild(optionElement)
+      })
     });
-  }
-  getHtml() {
-    return `
-    <input ${this.disabled ? CommonClasses.DISABLED : ""} list="${
-      this.id
-    }list" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)">
+    this.element.setAttribute("list", `${this.id}list`);
 
-    <datalist id="${this.id}list">
-      ${this.options.map((option) => `<option value="${option}">`).join(" ")}
-    </datalist>
-    `;
-    // return `<button class="${this.classes.reverse().join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${this.id}">${this.value}</button>`;
+    this.datalistElement = WEB_CONTEXT.doc.createElement("datalist");
+    this.datalistElement.setAttribute('id', `${this.id}list`);
+
+    const inputElement = this.element;
+    this.element = WEB_CONTEXT.doc.createElement("div");
+    this.element.appendChild(inputElement);
+    this.element.appendChild(this.datalistElement); 
   }
 }
 
@@ -325,107 +310,66 @@ class Button extends BaseInputComponent {
   constructor(value, ...classes) {
     super(value, ["button"].concat(...classes));
     this.actionListeners = [];
-    ACTION_LISTENER_CONTEXT[`${this.id}`] = () =>
-      this.actionListeners.forEach((listener) => listener());
-  }
-  getHtml() {
-    return `<button ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } class="${this.classes
-      .reverse()
-      .join(" ")}" onclick="ACTION_LISTENER_CONTEXT['${this.id}']()"  id="${
-      this.id
-    }">${this.value}</button>`;
+
+    this.element = WEB_CONTEXT.doc.createElement("button");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.setAttribute("id", this.id);
+    this.element.innerText = this.value;
+    this.element.addEventListener("click", (e) =>
+      this.actionListeners.forEach((listener) => listener()));
   }
 }
 
 class TextField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textfield"].concat(...classes));
-  }
-  getHtml() {
-    return `<input ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } type="text" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
-      this.id
-    }">`;
+    this.element.setAttribute("type", "text");
   }
 }
 
 class PasswordField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["password"].concat(...classes));
-  }
-  getHtml() {
-    return `<input ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } type="password" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
-      this.id
-    }">`;
+    this.element.setAttribute("type", "password");
   }
 }
 
 class TextArea extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textarea"].concat(...classes));
-  }
-  getHtml() {
-    return `<textarea ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } class="${this.classes
-      .reverse()
-      .join(" ")}" onInput="ACTION_LISTENER_CONTEXT['${
-      this.id
-    }'](event)"  id="${this.id}">${this.value}</textarea>`;
+    this.element = WEB_CONTEXT.doc.createElement("textarea");
+    this.element.classList.add(...this.classes.reverse());
+    this.element.setAttribute("id", this.id);
+    this.element.value = this.value;
+    this.element.addEventListener("input", (e) => {
+      this.value = e.target.value;
+      this.actionListeners.forEach((listener) => {
+        if (!this.disabled) {
+          listener(this.value);
+        }
+      });
+    });
   }
 }
 
 class DateField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["datefield"].concat(...classes));
-  }
-  getHtml() {
-    return `<input ${
-      this.disabled ? "disabled" : ""
-    } type="date" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
-      this.id
-    }">`;
+    this.element.setAttribute("type", "date");
   }
 }
 
 class NumberField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["numberfield"].concat(...classes));
-  }
-  getHtml() {
-    return `<input ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } type="number" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
-      this.id
-    }">`;
+    this.element.setAttribute("type", "number");
   }
 }
 
 class ColorField extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["colorfield"].concat(...classes));
-  }
-  getHtml() {
-    return `<input ${
-      this.disabled ? CommonClasses.DISABLED : ""
-    } type="color" class="${this.classes.reverse().join(" ")}" value="${
-      this.value
-    }" onInput="ACTION_LISTENER_CONTEXT['${this.id}'](event)"  id="${
-      this.id
-    }">`;
+    this.element.setAttribute("type", "color");
   }
 }
 
@@ -434,20 +378,19 @@ class Scene extends Container {
     super(new BorderLayout(), "scene");
     this.title = title;
     this.id = route;
+    this.element.setAttribute("id", this.id);
     this.hidden = true;
-    this.classes.push(CommonClasses.HIDDEN);
+    this.addClasses(CommonClasses.HIDDEN);
   }
   open() {
     WEB_CONTEXT.doc.title = this.title;
     this.classes = this.classes.filter((cls) => cls !== CommonClasses.HIDDEN);
+    this.removeClass(CommonClasses.HIDDEN);
     this.hidden = false;
-    this.paint();
   }
   close() {
     this.hidden = true;
-    if (!this.classes.includes(CommonClasses.HIDDEN)) {
-      this.classes.push(CommonClasses.HIDDEN);
-    }
+    this.addClasses(CommonClasses.HIDDEN);
   }
 }
 
@@ -455,15 +398,18 @@ class SceneManager extends Container {
   constructor(title = "Old-Fashioned") {
     super(new GridLayout(), "glass");
     this.id = "glass";
+    this.element = WEB_CONTEXT.doc.getElementById('glass');
+    WEB_CONTEXT.doc.title = title;
     this.routes = {};
     this.currentRoute = undefined;
     this.previousRoutes = [];
 
-    window.addEventListener("hashchange", (event) => {
+    WEB_CONTEXT.window.addEventListener("hashchange", (event) => {
       // browser updates location, take that hash (sceneId) and route to it.
       this.routeTo(location.hash.replace(/^#/, ""));
     });
   }
+
   createScene(route, title) {
     const newScene = new Scene(route, title);
     this.add(newScene);
@@ -493,11 +439,10 @@ class SceneManager extends Container {
       if (this.routes[id] && sceneId === id) {
         this.routes[id].open();
         this.currentRoute = this.routes[id];
-        window.location.href = "#" + id;
+        WEB_CONTEXT.window.location.href = "#" + id;
       } else if (this.routes[id] && sceneId !== id) {
         this.routes[id].close();
       }
     }
-    this.paint();
   }
 }

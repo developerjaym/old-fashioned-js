@@ -1,44 +1,3 @@
-class WizardFork extends Model {
-    constructor(name, component, evaluator) {
-        this.name = name;
-        this.component = component;
-        this.evaluator = evaluator;
-    }
-    setInput(input) {
-        this.component.onUpdate(input);
-    }
-    finish() {
-        this.e
-    }
-}
-
-class Wizard extends Observer {
-    constructor(onFinish, accumulator = {}) {
-        this.forks = {}; // a map
-        this.onFinish = onFinish;
-        this.accumulator = accumulator;
-        this.activeFork;
-    }
-    addFork(fork) {
-        this.forks[fork.name] = fork;
-        fork.parentWizard = this;
-        fork.addObserver(this);
-    }
-    progressTo(name) {
-        this.activeFork = this.forks[name];
-        this.activeFork.setInput(accumulator);
-    }
-    onUpdate(message) {
-        if (message.finished) {
-            this.onFinish(accumulator);
-        }
-        else if (message.next) {
-            this.progressTo(message.next);
-        }
-    }
-
-}
-
 class WizardForm extends FormEntryGroup {
     constructor(label, onSubmit) {
         super("", {}, label);
@@ -52,8 +11,6 @@ class WizardForm extends FormEntryGroup {
         this.nextButton = new Button('Next').addActionListener(e => this.progress());
         this.component
             .add(new Label(this.label, FontSize.FIRST_HEADER), Position.NORTH)
-            // .add(this.submissionButton, Position.SOUTH)
-            // .add(this.previousButton, Position.WEST)
             .add(this.nextButton, Position.EAST)
             .add(this.center, Position.CENTER);
     }
@@ -99,7 +56,6 @@ class WizardForm extends FormEntryGroup {
             // this.submissionButton.setDisabled(false);
             this.onSubmit(this.getObject());
         }
-        this.component.paint();
     }
     isValid() {
         return this.children.reduce((pre, cur) => {

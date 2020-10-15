@@ -64,7 +64,7 @@ class ConvenientContainers {
       new BorderLayout(),
       [ConvenientClasses.STRIPED].concat(...classes)
     )
-      .add(new Label(title, FontSize.FIRST_HEADER), Position.NORTH)
+      .add(new Label(title, FontSize.FIRST_HEADER), Position.CENTER)
       .add(
         new Container(new GridLayout(1))
           .add(new Button("Sign Up").addActionListener(onSignUp))

@@ -25,8 +25,9 @@ class StringValidators {
 }
 
 class ArrayValidators {
-  static NOT_EMPTY = new Validator("Required", (val) =>
-    !val || !JSON.parse(val).length
+  static NOT_EMPTY = new Validator("Required", (val) => {
+    !val || !JSON.parse(val).length;
+  }
   );
 }
 
@@ -58,7 +59,7 @@ class FormLayout extends Layout {
     return ``;
   }
   add(newComponent, containerComponents, ...constraints) {
-    newComponent.classes.push(constraints[0]);
+    newComponent.addClasses(constraints[0]);
     containerComponents[`${constraints[0]}`] = newComponent;
   }
 }
@@ -144,7 +145,7 @@ class NumberFormEntry extends BaseInputFormEntry {
     super(key, value, label, new NumberField(value || 0), ...validators);
   }
   getObject() {
-    return `"${this.key}": ${this.getValue()}`;
+    return `"${this.key}": ${this.getValue() ? `${this.getValue()}` : null}`;
   }
 }
 class DropdownListFormEntry extends BaseInputFormEntry {
@@ -246,7 +247,7 @@ class SubmissionForm extends FormEntryGroup {
       // this.submissionButton.setDisabled(false);
       this.listener(this.getObject());
     }
-    this.component.paint();
+    // this.component.paint();
   }
   addChildren(...formEntry) {
     this.center.removeAll();
