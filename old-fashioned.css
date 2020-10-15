@@ -41,7 +41,7 @@ body {
 }
 .scene {
   min-height: 100vh;
-  width: fit-content;
+  width: auto;
 }
 .container {
   display: grid;
@@ -52,7 +52,7 @@ body {
 .full-width {
   grid-column-start: 1;
   grid-column-end: none;
-  height: fit-content;
+  height: auto;
 }
 .component {
   width: 100%;
@@ -82,7 +82,7 @@ body {
 .button {
   text-align: center;
   padding: var(--padding-thick);
-  width: fit-content;
+  width: auto;
 }
 .long-text {
   max-width: 600px;
