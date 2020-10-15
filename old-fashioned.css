@@ -45,8 +45,6 @@ body {
 }
 .container {
   display: grid;
-  /* height: 100%; */
-  /* width: 100%; */
   background-color: var(--main-bg-color);
 }
 .full-width {
@@ -111,7 +109,6 @@ body {
 
 .border-layout {
   display: grid;
-  /* grid-template-columns: max-content minmax(100px, calc(100vw - var(--padding-thick))) max-content; */
   grid-template-columns: min(var(--padding-thick), max-content) 1fr max-content;
   grid-template-areas:
     "north north  north"

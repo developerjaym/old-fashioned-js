@@ -243,7 +243,8 @@ class Label extends Component {
     this.element.setAttribute("for", this.for);
   }
   setFor(inputComponent) {
-    this.for = `for="${inputComponent.id}"`;
+    this.for = inputComponent.id;
+    this.element.setAttribute("for", this.for);
     return this;
   }
 }
