@@ -48,16 +48,16 @@
                         new DateFormEntry('shipDate', updatedOrder.shipDate, 'Ship Date', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')),
                         ConvenientForms.ADDRESS_FORM_BUILDER(updatedOrder.address).setDisabled(true),
                         new FormEntryGroupArray('batteries', updatedOrder.batteries, 'Batteries',
-                            (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
+                            (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)//.removable()
                                 .addChildren(
                                     new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned/examples/battery-models.json')
                                         .then(response => response.json()), StringValidators.NOT_EMPTY),
                                     new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
                                     new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
-                                ), 'Add Battery', ArrayValidators.NOT_EMPTY)
+                                ), 'Add Battery', ArrayValidators.NOT_EMPTY).setDisabled(true)
                     ).getComponent()
                     , Position.CENTER);
-            }
+            };
 
             orderScene.add(new Label('Loading...', FontSize.FIRST_HEADER), Position.CENTER);
 

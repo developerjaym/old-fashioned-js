@@ -208,7 +208,7 @@ class FormEntryGroup extends BaseFormEntry {
     if (this.removableGroup) {
       this.component.add(new Container().add(
         new Label(this.label, FontSize.SECOND_HEADER), Position.CENTER
-        )
+      )
         .add(
           this.removeButton, Position.SOUTH
         )
@@ -316,8 +316,13 @@ class FormEntryGroupArray extends FormEntryGroup {
       .add(this.addInputButton, Position.SOUTH)
       .add(this.center, Position.CENTER);
     if (this.value && this.value.length) {
-      this.value.forEach((item) =>
-        this.addChildren(this.formEntrySupplier(item, this.children.length + 1))
+      this.value.forEach((item) => {
+        const childGroup = this.formEntrySupplier(item, this.children.length + 1);
+        childGroup.addRemovalListener(() => {
+          this.removeChild(childGroup);
+        });
+        this.addChildren(childGroup);
+      }
       );
     }
   }

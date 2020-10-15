@@ -38,7 +38,7 @@
                     new DateFormEntry('shipDate', '', 'Ship Date', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')),
                     ConvenientForms.ADDRESS_FORM_BUILDER(),
                     new FormEntryGroupArray('batteries', [], 'Batteries',
-                        (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter).removable()
+                        (item, counter) => new FormEntryGroup('battery', {}, 'Battery ' + counter)
                             .addChildren(
                                 new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned/examples/battery-models.json')
                                     .then(response => response.json()), StringValidators.NOT_EMPTY),
