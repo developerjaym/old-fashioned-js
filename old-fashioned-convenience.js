@@ -1,10 +1,10 @@
-class ConvenientClasses {
-  static GHOST_BUTTON = "ghost";
-  static STRIPED = "striped";
+const ConvenientClasses = {
+  GHOST_BUTTON: "ghost",
+  STRIPED: "striped"
 }
 
-class ConvenientForms {
-  static ADDRESS_FORM_BUILDER = (address) =>
+const ConvenientForms = {
+  ADDRESS_FORM_BUILDER: (address) =>
     new FormEntryGroup("address", address, "Address", new Validator("US addresses require a region (state).",
       (val) => val && !JSON.parse(val).region && JSON.parse(val).country === 'US'
     ))
@@ -40,9 +40,9 @@ class ConvenientForms {
           "Postal Code",
           StringValidators.NOT_EMPTY
         )
-      );
+      ),
 
-  static LOGIN_FORM_BUILDER = (onLoginFunction) =>
+  LOGIN_FORM_BUILDER: (onLoginFunction) =>
     new SubmissionForm(
       "Login",
       (creds) => onLoginFunction(creds),
@@ -55,11 +55,11 @@ class ConvenientForms {
         "Password",
         StringValidators.NOT_EMPTY
       )
-    );
+    )
 }
 
-class ConvenientContainers {
-  static HEADER_CONTAINER_BUILDER = (title, onSignUp, onSignIn, ...classes) => {
+const ConvenientContainers = {
+  HEADER_CONTAINER_BUILDER: (title, onSignUp, onSignIn, ...classes) => {
     return new Container(
       new BorderLayout(),
       [ConvenientClasses.STRIPED].concat(...classes)
@@ -71,20 +71,20 @@ class ConvenientContainers {
           .add(new Button("Sign In").addActionListener(onSignIn)),
         Position.SOUTH
       );
-  };
+  },
 
-  static ARTICLE_BUILDER = (title, text, ...classes) => {
+  ARTICLE_BUILDER: (title, text, ...classes) => {
     return new Container(
       new BorderLayout(),
       [ConvenientClasses.STRIPED].concat(...classes)
     )
       .add(new Label(title, FontSize.SECOND_HEADER), Position.NORTH)
       .add(new LongText(text), Position.CENTER);
-  };
+  },
 
-  static FOOTER_CONTAINER = (companyName, startYear, endYear) => {
+  FOOTER_CONTAINER: (companyName, startYear, endYear) => {
     return new Container(new BorderLayout(), ConvenientClasses.STRIPED)
       .add(new Label(companyName), Position.NORTH)
       .add(new Label(startYear + "-" + endYear), Position.CENTER);
-  };
+  }
 }

@@ -15,45 +15,45 @@ class RegexValidator extends Validator {
   }
 }
 
-class StringValidators {
-  static NOT_EMPTY = new Validator("Required", (val) => !val);
-  static OF_LENGTH = (min, max) =>
+const StringValidators = {
+  NOT_EMPTY : new Validator("Required", (val) => !val),
+  OF_LENGTH : (min, max) =>
     new Validator(
       `Input must be between ${min} and ${max} characters.`,
       (val) => !val || val.length < min || val.length > max
-    );
+    )
 }
 
-class ArrayValidators {
-  static NOT_EMPTY = new Validator("Required", (val) => {
+const ArrayValidators = {
+  NOT_EMPTY : new Validator("Required", (val) => {
     return !val || !JSON.parse(val).length;
   }
-  );
+  )
 }
 
-class DateValidators {
-  static BEFORE = (max) =>
+const DateValidators = {
+  BEFORE : (max) =>
     new Validator(
       `Date must be before ${max}`,
       (val) => val && new Date(val) >= new Date(max)
-    );
-  static AFTER = (min) =>
+    ),
+  AFTER : (min) =>
     new Validator(
       `Date must be after ${min}`,
       (val) => val && new Date(val) <= new Date(min)
-    );
-  static BETWEEN = (min, max) =>
+    ),
+  BETWEEN : (min, max) =>
     new Validator(
       `Date must be between ${min} and ${max}`,
       (val) =>
         val &&
         (new Date(val) <= new Date(min) || new Date(val) >= new Date(max))
-    );
+    )
 }
 
 class FormLayout extends Layout {
   constructor() {
-    super(Layout.FORM_LAYOUT);
+    super(LayoutType.FORM_LAYOUT);
   }
   getStyle() {
     return ``;
@@ -133,6 +133,11 @@ class BaseInputFormEntry extends BaseFormEntry {
 class TextFormEntry extends BaseInputFormEntry {
   constructor(key, value, label, ...validators) {
     super(key, value, label, new TextField(value || ""), ...validators);
+  }
+}
+class TextAreaFormEntry extends BaseInputFormEntry {
+  constructor(key, value, label, ...validators) {
+    super(key, value, label, new TextArea(value || ""), ...validators);
   }
 }
 class PasswordFormEntry extends BaseInputFormEntry {

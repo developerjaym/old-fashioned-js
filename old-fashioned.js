@@ -1,8 +1,8 @@
-class CommonClasses {
-  static INVALID = "invalid";
-  static DISABLED = "disabled";
-  static HIDDEN = "hidden";
-  static WARNING = "warning";
+const CommonClasses = {
+   INVALID : "invalid",
+   DISABLED : "disabled",
+   HIDDEN : "hidden",
+   WARNING : "warning"
 }
 const ACTION_LISTENER_CONTEXT = {};
 
@@ -11,17 +11,20 @@ const WEB_CONTEXT = {
   window: window
 };
 
-class Position {
-  static NORTH = "north";
-  static EAST = "east";
-  static SOUTH = "south";
-  static WEST = "west";
-  static CENTER = "center";
+const Position = {
+   NORTH : "north",
+  EAST : "east",
+  SOUTH : "south",
+   WEST : "west",
+   CENTER : "center"
+}
+const LayoutType = {
+   BORDER_LAYOUT : "border-layout",
+   GRID_LAYOUT : "grid-layout",
+   FORM_LAYOUT : "form-layout"
 }
 class Layout {
-  static BORDER_LAYOUT = "border-layout";
-  static GRID_LAYOUT = "grid-layout";
-  static FORM_LAYOUT = "form-layout";
+  
   constructor(type) {
     this.type = type;
     this.counter = 0;
@@ -36,7 +39,7 @@ class Layout {
 
 class GridLayout extends Layout {
   constructor(width) {
-    super(Layout.GRID_LAYOUT);
+    super(LayoutType.GRID_LAYOUT);
     this.width = width;
   }
   getStyle() {
@@ -47,7 +50,7 @@ class GridLayout extends Layout {
 
 class BorderLayout extends Layout {
   constructor() {
-    super(Layout.BORDER_LAYOUT);
+    super(LayoutType.BORDER_LAYOUT);
   }
   getStyle() {
     return ``;
@@ -58,11 +61,11 @@ class BorderLayout extends Layout {
   }
 }
 
-class FontSize {
-  static SMALL = "small-font";
-  static FIRST_HEADER = "first-header";
-  static SECOND_HEADER = "second-header";
-  static THIRD_HEADER = "third-header";
+const FontSize = {
+   SMALL : "small-font",
+   FIRST_HEADER : "first-header",
+   SECOND_HEADER : "second-header",
+   THIRD_HEADER : "third-header"
 }
 
 class Controller {
