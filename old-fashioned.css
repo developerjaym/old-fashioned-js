@@ -74,6 +74,7 @@ body {
   border-radius: var(--border-radius);
   border-width: var(--border-width-thin);
   border-style: solid;
+  align-self: center;
 }
 
 .label,

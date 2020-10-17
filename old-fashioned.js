@@ -1,10 +1,9 @@
 const CommonClasses = {
-   INVALID : "invalid",
-   DISABLED : "disabled",
-   HIDDEN : "hidden",
-   WARNING : "warning"
+  INVALID: "invalid",
+  DISABLED: "disabled",
+  HIDDEN: "hidden",
+  WARNING: "warning"
 }
-const ACTION_LISTENER_CONTEXT = {};
 
 const WEB_CONTEXT = {
   doc: document,
@@ -12,19 +11,19 @@ const WEB_CONTEXT = {
 };
 
 const Position = {
-   NORTH : "north",
-  EAST : "east",
-  SOUTH : "south",
-   WEST : "west",
-   CENTER : "center"
+  NORTH: "north",
+  EAST: "east",
+  SOUTH: "south",
+  WEST: "west",
+  CENTER: "center"
 }
 const LayoutType = {
-   BORDER_LAYOUT : "border-layout",
-   GRID_LAYOUT : "grid-layout",
-   FORM_LAYOUT : "form-layout"
+  BORDER_LAYOUT: "border-layout",
+  GRID_LAYOUT: "grid-layout",
+  FORM_LAYOUT: "form-layout"
 }
 class Layout {
-  
+
   constructor(type) {
     this.type = type;
     this.counter = 0;
@@ -62,10 +61,10 @@ class BorderLayout extends Layout {
 }
 
 const FontSize = {
-   SMALL : "small-font",
-   FIRST_HEADER : "first-header",
-   SECOND_HEADER : "second-header",
-   THIRD_HEADER : "third-header"
+  SMALL: "small-font",
+  FIRST_HEADER: "first-header",
+  SECOND_HEADER: "second-header",
+  THIRD_HEADER: "third-header"
 }
 
 class Controller {
@@ -144,7 +143,7 @@ class Container extends Component {
     this.element.setAttribute("id", this.id);
     this.element.style.cssText += this.layout.getStyle();
   }
- 
+
   setDisabled(disabled) {
     this.disabled = disabled;
     for (const key of Object.keys(this.components)) {
@@ -292,7 +291,7 @@ class DropdownList extends BaseInputComponent {
     arraySupplier.then((arr) => {
       this.options = arr;
       this.options.forEach(option => {
-        const optionElement =  WEB_CONTEXT.doc.createElement("option");
+        const optionElement = WEB_CONTEXT.doc.createElement("option");
         optionElement.value = option;
         this.datalistElement.appendChild(optionElement)
       })
@@ -301,11 +300,7 @@ class DropdownList extends BaseInputComponent {
 
     this.datalistElement = WEB_CONTEXT.doc.createElement("datalist");
     this.datalistElement.setAttribute('id', `${this.id}list`);
-
-    this.inputElement = this.element;
-    this.element = WEB_CONTEXT.doc.createElement("div");
-    this.element.appendChild(this.inputElement);
-    this.element.appendChild(this.datalistElement); 
+    this.element.appendChild(this.datalistElement);
   }
   setDisabled(disabled) {
     this.disabled = disabled;
