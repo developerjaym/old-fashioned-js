@@ -34,21 +34,22 @@ const ArrayValidators = {
 const DateValidators = {
   BEFORE : (max) =>
     new Validator(
-      `Date must be before ${max}`,
-      (val) => val && new Date(val) >= new Date(max)
+      `Date must be before ${max}.`,
+      (val) => val && new Date(val + 'T23:59:59.999Z') >= new Date(max + 'T23:59:59.999Z')
     ),
   AFTER : (min) =>
     new Validator(
       `Date must be after ${min}`,
-      (val) => val && new Date(val) <= new Date(min)
+      (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date(min + 'T23:59:59.999Z')
     ),
   BETWEEN : (min, max) =>
     new Validator(
       `Date must be between ${min} and ${max}`,
       (val) =>
         val &&
-        (new Date(val) <= new Date(min) || new Date(val) >= new Date(max))
-    )
+        (new Date(val) <= new Date(min) || new Date(val + 'T23:59:59.999Z') >= new Date(max + 'T23:59:59.999Z'))
+    ),
+  AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())  
 }
 
 class FormLayout extends Layout {

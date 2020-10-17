@@ -402,6 +402,7 @@ class SceneManager extends Container {
     super(new GridLayout(), "glass");
     this.id = "glass";
     this.element = WEB_CONTEXT.doc.getElementById('glass');
+    this.element.innerText = '';
     WEB_CONTEXT.doc.title = this.title;
     this.routes = {};
     this.currentRoute = undefined;

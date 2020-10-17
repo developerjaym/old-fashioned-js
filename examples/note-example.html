@@ -13,34 +13,81 @@
     <script src="../old-fashioned-convenience.js"></script>
     <script>
         window.onload = () => {
+            const model = new Model();
+            model.onSearchTermsEntered = (query) => {
+                let searchTerms = query.split(",").filter(Boolean).map(s => s.trim().toLowerCase());
+                if (searchTerms.length === 0) {
+                    model.observers.forEach((observer) => observer.onUpdate(model.value));
+                    return;
+                }
+                const resultsMap = model.value.reduce((pre, cur) => {
+                    let score = 0;
+                    if (searchTerms.includes(cur.category.toLowerCase())) {
+                        score += 2;
+                    }
+                    for (let i = 0; i < searchTerms.length; i++) {
+                        if (cur.description.toLowerCase().includes(searchTerms[i])) {
+                            score++;
+                        }
+                        if (cur.title.toLowerCase().includes(searchTerms[i])) {
+                            score++;
+                        }
+                    }
+                    pre[JSON.stringify(cur)] = score;
+                    return pre;
+                }, {});
+                model.value.sort((a, b) => resultsMap[JSON.stringify(b)] - resultsMap[JSON.stringify(a)]);
+                model.onUpdate(model.value);
+            };
 
-            
+            const controller = new Controller(model);
+            controller.onSave = (update) => {
+                localStorage.setItem("notes-example", JSON.stringify(update));
+                model.onUpdate(update.items);
+            };
+            controller.onSearch = (searchTerm) => {
+                controller.model.onSearchTermsEntered(searchTerm);
+            }
+
             const sceneManager = new SceneManager();
             const listScene = sceneManager.createScene('notes', 'Old Fashioned Notes');
-            listScene.add(
-                new SubmissionForm('Old Fashioned Notes', (o) => localStorage.setItem("notes-example", JSON.stringify(o)), "Save")
-                    .addChildren(
-                        new FormEntryGroupArray('items', localStorage.getItem('notes-example') ? JSON.parse(localStorage.getItem('notes-example')).items : [], 'Notes',
-                            (item, counter) => new FormEntryGroup('item', {}, 'Note ' + counter).removable()
-                                .addChildren(
-                                    new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),
-                                    new DropdownListFormEntry('category', item.category, 'Category',
-                                        new Promise(resolve => resolve(['Hobby', 'Work', 'Family']))),
-                                    new TextAreaFormEntry('description', item.description, 'Description')
-                                ), 'Add Note', ArrayValidators.NOT_EMPTY)
-                    ).getComponent()
-                , Position.CENTER)
-                .add(
-                    new Container().add(new TextField(), Position.CENTER).add(new Button("Search"), Position.EAST),
-                    Position.NORTH
-                );
+
+            listScene.onUpdate = (updatedItems) => {
+                listScene.removeAll();
+                const searchField = new TextField();
+                const searchButton = new Button("Search").addActionListener((e) => controller.onSearch(searchField.getValue()));
+                const submissionForm = new SubmissionForm('Old Fashioned Notes', (o) => controller.onSave(o), "Save")
+                        .addChildren(
+                            new FormEntryGroupArray('items', updatedItems, 'Notes',
+                                (item, counter) => new FormEntryGroup('item', {}, 'Note ' + counter).removable()
+                                    .addChildren(
+                                        new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),
+                                        new DropdownListFormEntry('category', item.category, 'Category',
+                                            new Promise(resolve => resolve(['Hobby', 'Work', 'Family']))),
+                                        new TextAreaFormEntry('description', item.description, 'Description')
+                                    ), 'Add Note', ArrayValidators.NOT_EMPTY)
+                        );
+                listScene.add(
+                    submissionForm.getComponent()
+                    , Position.CENTER)
+                    .add(
+                        new Container()
+                            .add(new Button("Save").addActionListener((e) => controller.onSave(submissionForm.getObject())), Position.WEST)
+                            .add(new Container().add(searchField, Position.CENTER).add(searchButton, Position.EAST), Position.EAST),
+                        Position.NORTH
+                    );
+            };
+
+            model.addObserver(listScene);
+            controller.onModelUpdate(localStorage.getItem('notes-example') ? JSON.parse(localStorage.getItem('notes-example')).items : []);
+
             sceneManager.routeTo('notes');
         };
     </script>
 </head>
 
 <body>
-    <div id="glass"></div>
+    <div id="glass">Something is probably broken. Refresh the page or go to another, better site.</div>
 </body>
 
 </html>
