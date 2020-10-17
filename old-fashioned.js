@@ -1,15 +1,13 @@
+const WEB_CONTEXT = {
+  doc: document,
+  window: window
+};
 const CommonClasses = {
   INVALID: "invalid",
   DISABLED: "disabled",
   HIDDEN: "hidden",
   WARNING: "warning"
 }
-
-const WEB_CONTEXT = {
-  doc: document,
-  window: window
-};
-
 const Position = {
   NORTH: "north",
   EAST: "east",
@@ -105,7 +103,6 @@ class Component extends Observer {
       Math.random() * 1000000000
     )}`;
     this.parent = null;
-    this.attributes = {};
     this.element = null;
   }
   setParent(parentContainer) {
@@ -113,8 +110,11 @@ class Component extends Observer {
   }
   setDisabled(disabled) {
     this.disabled = disabled;
-    if (this.element) {
+    if (this.disabled) {
       this.addClasses(CommonClasses.DISABLED);
+    }
+    else if (!this.disabled) {
+      this.removeClass(CommonClasses.DISABLED);
     }
     return this;
   }
@@ -124,9 +124,7 @@ class Component extends Observer {
   }
 
   removeClass(classToRemove) {
-    if (this.element) {
-      this.element.classList.remove(classToRemove);
-    }
+    this.element.classList.remove(classToRemove);
   }
 }
 
@@ -217,11 +215,10 @@ class ImageLabel extends Component {
 class LongText extends Component {
   constructor(text, ...classes) {
     super(["long-text"].concat(...classes));
-    this.text = text;
     this.element = WEB_CONTEXT.doc.createElement("div");
     this.element.classList.add(...this.classes.reverse());
     this.element.appendChild;
-    this.text
+    text
       .split("\n")
       .map((p) => {
         const paragraph = WEB_CONTEXT.doc.createElement("p");
@@ -236,13 +233,10 @@ class LongText extends Component {
 class Label extends Component {
   constructor(text, ...classes) {
     super(["label"].concat(...classes));
-    this.text = text;
-    this.for = "";
     this.element = WEB_CONTEXT.doc.createElement("label");
     this.element.classList.add(...this.classes.reverse());
-    this.element.innerText = this.text;
+    this.element.innerText = text;
     this.element.setAttribute("id", this.id);
-    this.element.setAttribute("for", this.for);
   }
   setFor(inputComponent) {
     this.for = inputComponent.id;
@@ -405,8 +399,6 @@ class SceneManager extends Container {
     this.element.innerText = '';
     WEB_CONTEXT.doc.title = this.title;
     this.routes = {};
-    this.currentRoute = undefined;
-    this.previousRoutes = [];
 
     WEB_CONTEXT.window.addEventListener("hashchange", (event) => {
       // browser updates location, take that hash (sceneId) and route to it.
@@ -427,22 +419,10 @@ class SceneManager extends Container {
     delete this.routes[scene.id];
     return super.remove(scene);
   }
-  goBack() {
-    this.routeTo(this.previousRoutes.shift().id);
-  }
   routeTo(sceneId) {
-    if (
-      this.routes[sceneId] &&
-      this.currentRoute &&
-      this.currentRoute.id === sceneId
-    ) {
-      this.previousRoutes.unshift(this.routes[sceneId]); // so we can go back to it later
-    }
-
     for (const id of Object.keys(this.routes)) {
       if (this.routes[id] && sceneId === id) {
         this.routes[id].open();
-        this.currentRoute = this.routes[id];
         WEB_CONTEXT.window.location.href = "#" + id;
       } else if (this.routes[id] && sceneId !== id) {
         this.routes[id].close();

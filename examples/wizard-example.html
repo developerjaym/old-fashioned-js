@@ -43,7 +43,7 @@
                                 new DropdownListFormEntry('batteryModel', item.batteryModel, 'Battery Model', fetch('https://jayckers.com/old-fashioned/examples/battery-models.json')
                                     .then(response => response.json()), StringValidators.NOT_EMPTY),
                                 new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
-                                new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
+                                new TextFormEntry('cover', item.cover, 'Cover', StringValidators.NOT_EMPTY, new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
                             ), 'Add Battery',  ArrayValidators.NOT_EMPTY)
                 ).getComponent()
 

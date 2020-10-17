@@ -72,7 +72,7 @@
                     , Position.CENTER)
                     .add(
                         new Container()
-                            .add(new Button("Save").addActionListener((e) => controller.onSave(submissionForm.getObject())), Position.WEST)
+                            .add(new Button("Save").addActionListener((e) => submissionForm.submit()), Position.WEST)
                             .add(new Container().add(searchField, Position.CENTER).add(searchButton, Position.EAST), Position.EAST),
                         Position.NORTH
                     );

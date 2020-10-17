@@ -1,5 +1,5 @@
 class Validator {
-  constructor(label, invalid = (val) => false) {
+  constructor(label, invalid) {
     this.label = label;
     this.invalid = invalid;
   }
@@ -10,14 +10,14 @@ class RegexValidator extends Validator {
     super(
       label,
       (val) =>
-        !val || ![].concat(val.match(regex)).some((match) => match === val)
+        val && ![].concat(val.match(regex)).some((match) => match === val)
     );
   }
 }
 
 const StringValidators = {
-  NOT_EMPTY : new Validator("Required", (val) => !val),
-  OF_LENGTH : (min, max) =>
+  NOT_EMPTY: new Validator("Required", (val) => !val),
+  OF_LENGTH: (min, max) =>
     new Validator(
       `Input must be between ${min} and ${max} characters.`,
       (val) => !val || val.length < min || val.length > max
@@ -25,31 +25,30 @@ const StringValidators = {
 }
 
 const ArrayValidators = {
-  NOT_EMPTY : new Validator("Required", (val) => {
-    return !val || !JSON.parse(val).length;
-  }
+  NOT_EMPTY: new Validator("Required", (val) =>
+    !val || !JSON.parse(val).length
   )
 }
 
 const DateValidators = {
-  BEFORE : (max) =>
+  BEFORE: (max) =>
     new Validator(
       `Date must be before ${max}.`,
       (val) => val && new Date(val + 'T23:59:59.999Z') >= new Date(max + 'T23:59:59.999Z')
     ),
-  AFTER : (min) =>
+  AFTER: (min) =>
     new Validator(
       `Date must be after ${min}`,
       (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date(min + 'T23:59:59.999Z')
     ),
-  BETWEEN : (min, max) =>
+  BETWEEN: (min, max) =>
     new Validator(
       `Date must be between ${min} and ${max}`,
       (val) =>
         val &&
         (new Date(val) <= new Date(min) || new Date(val + 'T23:59:59.999Z') >= new Date(max + 'T23:59:59.999Z'))
     ),
-  AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())  
+  AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())
 }
 
 class FormLayout extends Layout {
@@ -265,10 +264,7 @@ class SubmissionForm extends FormEntryGroup {
       if (cur.getValidationErrors().length) {
         return false;
       }
-      if (!pre) {
-        return false;
-      }
-      return true;
+      return pre;
     }, true);
 
     if (valid) {
