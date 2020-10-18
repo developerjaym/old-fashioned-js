@@ -298,7 +298,7 @@ class DropdownList extends BaseInputComponent {
   }
   setDisabled(disabled) {
     this.disabled = disabled;
-    this.inputElement.disabled = disabled;
+    this.element.disabled = disabled;
     return this;
   }
 }
