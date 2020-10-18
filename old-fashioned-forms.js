@@ -139,6 +139,9 @@ class TextAreaFormEntry extends BaseInputFormEntry {
   constructor(key, value, label, ...validators) {
     super(key, value, label, new TextArea(value || ""), ...validators);
   }
+  getObject() {
+    return `"${this.key}": ${this.getValue() ? `"${this.getValue().replace('\n', '\\n')}"` : null}`;
+  }
 }
 class PasswordFormEntry extends BaseInputFormEntry {
   constructor(key, value, label, ...validators) {

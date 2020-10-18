@@ -10,4 +10,5 @@
 11. The 'theme' and the css code aren't very integrated yet.
 13. Grid/Table
 14. I18N
+15. Fix problem with line breaks
 */

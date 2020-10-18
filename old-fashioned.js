@@ -248,18 +248,16 @@ class Label extends Component {
 class BaseInputComponent extends Component {
   constructor(value, ...classes) {
     super(["input-component"].concat(...classes));
-    this.value = value || "";
     this.actionListeners = [];
 
     this.element = WEB_CONTEXT.doc.createElement("input");
     this.element.classList.add(...this.classes.reverse());
     this.element.setAttribute("id", this.id);
-    this.element.value = this.value;
+    this.element.value = value || "";
     this.element.addEventListener("input", (e) => {
-      this.value = e.target.value;
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
-          listener(this.value);
+          listener(e.target.value);
         }
       });
     });
@@ -269,7 +267,7 @@ class BaseInputComponent extends Component {
     return this;
   }
   getValue() {
-    return this.value;
+    return this.element.value;
   }
   setDisabled(disabled) {
     this.disabled = disabled;
@@ -311,7 +309,7 @@ class Button extends BaseInputComponent {
     this.element = WEB_CONTEXT.doc.createElement("button");
     this.element.classList.add(...this.classes.reverse());
     this.element.setAttribute("id", this.id);
-    this.element.innerText = this.value;
+    this.element.innerText = value;
     this.element.addEventListener("click", (e) =>
       this.actionListeners.forEach((listener) => listener()));
   }
@@ -337,12 +335,11 @@ class TextArea extends BaseInputComponent {
     this.element = WEB_CONTEXT.doc.createElement("textarea");
     this.element.classList.add(...this.classes.reverse());
     this.element.setAttribute("id", this.id);
-    this.element.value = this.value;
+    this.element.value = text || "";
     this.element.addEventListener("input", (e) => {
-      this.value = e.target.value;
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
-          listener(this.value);
+          listener(e.target.value);
         }
       });
     });
