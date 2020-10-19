@@ -140,7 +140,7 @@ class TextAreaFormEntry extends BaseInputFormEntry {
     super(key, value, label, new TextArea(value || ""), ...validators);
   }
   getObject() {
-    return `"${this.key}": ${this.getValue() ? `"${this.getValue().replace('\n', '\\n')}"` : null}`;
+    return `"${this.key}": ${this.getValue() ? `"${this.getValue().replaceAll(/(\r\n|\n|\r)/gm, '\\n')}"` : null}`;
   }
 }
 class PasswordFormEntry extends BaseInputFormEntry {
