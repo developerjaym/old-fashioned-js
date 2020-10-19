@@ -47,11 +47,6 @@ body {
   display: grid;
   background-color: var(--main-bg-color);
 }
-.full-width {
-  grid-column-start: 1;
-  grid-column-end: none;
-  height: auto;
-}
 .component {
   width: 100%;
   box-sizing: border-box;
@@ -76,7 +71,6 @@ body {
   border-style: solid;
   align-self: center;
 }
-
 .label,
 .button {
   text-align: center;
@@ -92,7 +86,7 @@ body {
   min-height: calc(12 * var(--main-font-size));
 }
 .form-label {
-  text-align: right;
+  text-align: left;
   width: inherit;
 }
 .invalid {
@@ -173,6 +167,22 @@ body {
   border-color: var(--error-fg-color);
   border-width: var(--border-width-thin);
   border-style: solid;
+}
+.form-input-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "north"
+    "center"
+    "south";
+  justify-content: start;
+}
+.form-input-layout .label {
+  text-align: left;
+  padding-left: var(--padding-narrow);
+  width: auto;
+  justify-self: start;
+  font-weight: bold;
 }
 .button:hover {
   color: var(--accent-bg-color);

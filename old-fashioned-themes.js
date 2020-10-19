@@ -23,7 +23,7 @@ class Theme {
       this.style = newStyle;
       for (const key in this.style) {
         if (this.style[key] !== '') {
-          WEB_CONTEXT.doc.documentElement.style.setProperty(key, this.style[key]);
+          BAR.doc.documentElement.style.setProperty(key, this.style[key]);
         }
       }
     }

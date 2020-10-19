@@ -63,6 +63,18 @@ class FormLayout extends Layout {
     containerComponents[`${constraints[0]}`] = newComponent;
   }
 }
+class FormInputLayout extends Layout {
+  constructor() {
+    super(LayoutType.FORM_INPUT_LAYOUT);
+  }
+  getStyle() {
+    return ``;
+  }
+  add(newComponent, containerComponents, ...constraints) {
+    newComponent.addClasses(constraints[0]);
+    containerComponents[`${constraints[0]}`] = newComponent;
+  }
+}
 
 class BaseFormEntry {
   constructor(key, value, label, ...validators) {
@@ -93,20 +105,19 @@ class BaseFormEntry {
 class BaseInputFormEntry extends BaseFormEntry {
   constructor(key, value, label, inputComponent, ...validators) {
     super(key, value, label, ...validators);
-    this.component = new Container(new GridLayout(2));
+    this.component = new Container(new FormInputLayout());
     this.inputComponent = inputComponent;
     this.inputComponent.addActionListener((v) => {
       this.getValidationErrors();
       this.actionListeners.forEach(listener => listener(v));
     });
     this.validationErrorsContainer = new Container(
-      new GridLayout(1),
-      "full-width"
+      new GridLayout(1)
     );
     this.component
-      .add(new Label(this.label, "form-label").setFor(this.inputComponent))
-      .add(this.inputComponent)
-      .add(this.validationErrorsContainer);
+      .add(new Label(this.label).setFor(this.inputComponent), Position.NORTH)
+      .add(this.inputComponent, Position.CENTER)
+      .add(this.validationErrorsContainer, Position.SOUTH);
   }
   getValidationErrors() {
     this.validationErrorsContainer.removeAll();
