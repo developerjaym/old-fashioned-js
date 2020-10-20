@@ -29,9 +29,7 @@ const StringValidators = {
 }
 
 const ArrayValidators = {
-  NOT_EMPTY: new Validator("Required", (val) =>
-    !val || !JSON.parse(val).length
-  )
+  NOT_EMPTY: new Validator("Required", (val) =>  !val || !JSON.parse(val).length)
 }
 
 const DateValidators = {
@@ -123,7 +121,7 @@ class BaseInputFormEntry extends BaseFormEntry {
     return this.inputComponent.getValue();
   }
   getObject() {
-    return `"${this.key}": ${this.getValue() ? `"${this.getValue()}"` : null}`;
+    return `"${this.key}": ${this.getValue() ? `${JSON.stringify(this.getValue())}` : null}`;
   }
   getComponent() {
     return this.component;
@@ -141,9 +139,6 @@ class TextFormEntry extends BaseInputFormEntry {
 class TextAreaFormEntry extends BaseInputFormEntry {
   constructor(key, value, label, ...validators) {
     super(key, value, label, new TextArea(value || ""), ...validators);
-  }
-  getObject() {
-    return `"${this.key}": ${this.getValue() ? `"${this.getValue().replaceAll(/(\r\n|\n|\r)/gm, '\\n')}"` : null}`;
   }
 }
 class PasswordFormEntry extends BaseInputFormEntry {
