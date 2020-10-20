@@ -111,7 +111,7 @@ body {
     "west    center east"
     "south south  south";
 }
-.form-layout {
+.ncs-layout {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-areas:
@@ -168,16 +168,7 @@ body {
   border-width: var(--border-width-thin);
   border-style: solid;
 }
-.form-input-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    "north"
-    "center"
-    "south";
-  justify-content: start;
-}
-.form-input-layout .label {
+.form-label {
   text-align: left;
   padding-left: var(--padding-narrow);
   width: auto;

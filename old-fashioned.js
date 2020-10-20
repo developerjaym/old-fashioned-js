@@ -4,7 +4,6 @@ const BAR = {
   e: (t) => document.createElement(t)
 };
 const CommonClasses = {
-  INVALID: "invalid",
   DISABLED: "disabled",
   HIDDEN: "hidden",
   WARNING: "warning"
@@ -19,8 +18,7 @@ const Position = {
 const LayoutType = {
   BORDER_LAYOUT: "border-layout",
   GRID_LAYOUT: "grid-layout",
-  FORM_LAYOUT: "form-layout",
-  FORM_INPUT_LAYOUT: "form-input-layout"
+  NCS_LAYOUT: "ncs-layout"
 }
 class Layout {
 

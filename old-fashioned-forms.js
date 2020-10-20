@@ -1,3 +1,7 @@
+const FormClasses = {
+  FORM_LABEL: 'form-label',
+  INVALID: "invalid"
+}
 class Validator {
   constructor(label, invalid) {
     this.label = label;
@@ -51,21 +55,9 @@ const DateValidators = {
   AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())
 }
 
-class FormLayout extends Layout {
+class NcsLayout extends Layout {
   constructor() {
-    super(LayoutType.FORM_LAYOUT);
-  }
-  getStyle() {
-    return ``;
-  }
-  add(newComponent, containerComponents, ...constraints) {
-    newComponent.addClasses(constraints[0]);
-    containerComponents[`${constraints[0]}`] = newComponent;
-  }
-}
-class FormInputLayout extends Layout {
-  constructor() {
-    super(LayoutType.FORM_INPUT_LAYOUT);
+    super(LayoutType.NCS_LAYOUT);
   }
   getStyle() {
     return ``;
@@ -105,7 +97,7 @@ class BaseFormEntry {
 class BaseInputFormEntry extends BaseFormEntry {
   constructor(key, value, label, inputComponent, ...validators) {
     super(key, value, label, ...validators);
-    this.component = new Container(new FormInputLayout());
+    this.component = new Container(new NcsLayout());
     this.inputComponent = inputComponent;
     this.inputComponent.addActionListener((v) => {
       this.getValidationErrors();
@@ -115,7 +107,7 @@ class BaseInputFormEntry extends BaseFormEntry {
       new GridLayout(1)
     );
     this.component
-      .add(new Label(this.label).setFor(this.inputComponent), Position.NORTH)
+      .add(new Label(this.label, FormClasses.FORM_LABEL).setFor(this.inputComponent), Position.NORTH)
       .add(this.inputComponent, Position.CENTER)
       .add(this.validationErrorsContainer, Position.SOUTH);
   }
@@ -123,7 +115,7 @@ class BaseInputFormEntry extends BaseFormEntry {
     this.validationErrorsContainer.removeAll();
     const validationErrors = super.getValidationErrors();
     validationErrors.forEach((error) =>
-      this.validationErrorsContainer.add(new Label(error.label, "invalid"))
+      this.validationErrorsContainer.add(new Label(error.label, FormClasses.INVALID, FormClasses.FORM_LABEL))
     );
     return validationErrors;
   }
@@ -209,7 +201,7 @@ class FormEntryGroup extends BaseFormEntry {
     this.validationErrorsContainer.removeAll();
     const validationErrors = super.getValidationErrors();
     validationErrors.forEach((error) =>
-      this.validationErrorsContainer.add(new Label(error.label, "invalid"))
+      this.validationErrorsContainer.add(new Label(error.label, FormClasses.INVALID, FormClasses.FORM_LABEL))
     );
     return validationErrors;
   }
@@ -263,7 +255,7 @@ class FormEntryGroup extends BaseFormEntry {
 class SubmissionForm extends FormEntryGroup {
   constructor(label, listener, buttonLabel = "Submit") {
     super("", {}, label);
-    this.component = new Container(new FormLayout());
+    this.component = new Container(new NcsLayout());
     this.listener = listener;
     this.submissionButton = new Button(buttonLabel);
     this.submissionButton.addActionListener((e) => this.submit());
@@ -315,7 +307,7 @@ class FormEntryGroupArray extends FormEntryGroup {
   ) {
     super(key, value, label, ...validators);
     this.formEntrySupplier = formEntrySupplier;
-    this.component = new Container(new FormLayout());
+    this.component = new Container(new NcsLayout());
     this.addInputButton = new Button(addLabel);
     this.addInputButton.addActionListener((e) => {
       const childGroup = this.formEntrySupplier({}, this.children.length + 1);

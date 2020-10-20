@@ -4,38 +4,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
     <link rel="stylesheet" href="../old-fashioned.css" />
     <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
     <script src="../old-fashioned.js"></script>
     <script src="../old-fashioned-forms.js"></script>
-    <script src="../old-fashioned-wizards.js"></script>
-    <script src="../old-fashioned-convenience.js"></script>
-    <script>
-        window.onload = () => {
-            const sceneManager = new SceneManager();
-            const listScene = sceneManager.createScene('list', 'Old Fashioned List');
-            listScene.add(
-                new SubmissionForm('TODO List', (o) => localStorage.setItem("todo-example", JSON.stringify(o)), "Save")
-                    .addChildren(
-                        new FormEntryGroupArray('items', localStorage.getItem('todo-example') ? JSON.parse(localStorage.getItem('todo-example')).items.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)) : [], 'Items',
-                            (item, counter) => new FormEntryGroup('item', {}, 'Item ' + counter).removable()
-                                .addChildren(
-                                    new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),
-                                    new DropdownListFormEntry('category', item.category, 'Category',
-                                        new Promise(resolve => resolve(['Hobby', 'Work', 'Family']))),
-                                    new DateFormEntry('dueDate', item.dueDate, 'Due Date', DateValidators.AFTER_TODAY),
-                                    new TextAreaFormEntry('description', item.description, 'Description')
-                                ), 'Add Item', ArrayValidators.NOT_EMPTY)
-                    ).getComponent()
-                , Position.CENTER);
-            sceneManager.routeTo('list');
-        };
-    </script>
 </head>
 
 <body>
     <div id="glass"></div>
 </body>
+<script>
+    const sceneManager = new SceneManager();
+    const listScene = sceneManager.createScene('list', 'Old Fashioned List');
+    listScene.add(
+        new SubmissionForm('TODO List', (o) => localStorage.setItem("todo-example", JSON.stringify(o)), "Save")
+            .addChildren(
+                new FormEntryGroupArray('items', localStorage.getItem('todo-example') ? JSON.parse(localStorage.getItem('todo-example')).items.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)) : [], 'Items',
+                    (item, counter) => new FormEntryGroup('item', {}, 'Item ' + counter).removable()
+                        .addChildren(
+                            new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),
+                            new DropdownListFormEntry('category', item.category, 'Category',
+                                new Promise(resolve => resolve(['Hobby', 'Work', 'Family']))),
+                            new DateFormEntry('dueDate', item.dueDate, 'Due Date', DateValidators.AFTER_TODAY),
+                            new TextAreaFormEntry('description', item.description, 'Description')
+                        ), 'Add Item', ArrayValidators.NOT_EMPTY)
+            ).getComponent()
+        , Position.CENTER);
+    sceneManager.routeTo('list');
+</script>
 
 </html>
