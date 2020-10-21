@@ -29,7 +29,7 @@ const StringValidators = {
 }
 
 const ArrayValidators = {
-  NOT_EMPTY: new Validator("Required", (val) =>  !val || !JSON.parse(val).length)
+  NOT_EMPTY: new Validator("Required", (val) => !val || !JSON.parse(val).length)
 }
 
 const DateValidators = {
@@ -232,6 +232,23 @@ class FormEntryGroup extends BaseFormEntry {
     });
     return this;
   }
+  addReaction(formEntry, dependentFormEntry, shouldDisplayFunction) {
+    this.addChildren(formEntry);
+    shouldDisplayFunction(formEntry.getValue()) ? 
+      this.addChildren(dependentFormEntry) 
+      : this.removeChild(dependentFormEntry)
+    formEntry.addActionListener(v => shouldDisplayFunction(v) ? 
+      this.addChildren(dependentFormEntry) 
+      : this.removeChild(dependentFormEntry));
+    return this;
+  }
+  removeChild(formEntry) {
+    if(!this.children.includes(formEntry)) {
+      return;
+    }
+    this.children.splice(this.children.indexOf(formEntry), 1);
+    this.component.remove(formEntry.getComponent());
+  }
   getValue() {
     return `{${this.children.map((child) => child.getObject()).join(", ")}}`;
   }
@@ -277,6 +294,19 @@ class SubmissionForm extends FormEntryGroup {
     this.children.push(...formEntry);
     this.children.forEach((child) => this.center.add(child.getComponent()));
     return this;
+  }
+  removeChild(formEntry) {
+    if(!this.children.includes(formEntry)) {
+      return;
+    }
+    this.center.removeAll();
+    this.validationErrorsContainer.removeAll();
+    
+    this.children.splice(this.children.indexOf(formEntry), 1);
+    this.children.forEach((child) => {
+      this.center.add(child.getComponent());
+      child.addActionListener(v => this.getGroupLevelValidationErrors());
+    });
   }
   getValue() {
     return JSON.parse(
@@ -329,15 +359,6 @@ class FormEntryGroupArray extends FormEntryGroup {
       );
     }
   }
-  removeChild(formEntry) {
-    this.center.removeAll();
-    this.validationErrorsContainer.removeAll();
-    this.children.splice(this.children.indexOf(formEntry), 1);
-    this.children.forEach((child) => {
-      this.center.add(child.getComponent());
-      child.addActionListener(v => this.getGroupLevelValidationErrors());
-    });
-  }
   addChildren(...formEntry) {
     this.center.removeAll();
     this.validationErrorsContainer.removeAll();
@@ -347,6 +368,19 @@ class FormEntryGroupArray extends FormEntryGroup {
       child.addActionListener(v => this.getGroupLevelValidationErrors());
     });
     return this;
+  }
+  removeChild(formEntry) {
+    if(!this.children.includes(formEntry)) {
+      return;
+    }
+    this.center.removeAll();
+    this.validationErrorsContainer.removeAll();
+    
+    this.children.splice(this.children.indexOf(formEntry), 1);
+    this.children.forEach((child) => {
+      this.center.add(child.getComponent());
+      child.addActionListener(v => this.getGroupLevelValidationErrors());
+    });
   }
   getValue() {
     return `[${this.children.map((child) => child.getValue()).join(", ")}]`;

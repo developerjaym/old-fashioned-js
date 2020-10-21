@@ -12,12 +12,15 @@
     {
       "batteryModel": "T-1000",
       "quantity": 2,
-      "cover": "Y"
+      "cover": "Y",
+      "customized": "N"
     },
     {
       "batteryModel": "T-850",
       "quantity": 1,
-      "cover": "N"
+      "cover": "N",
+      "customized": "Y",
+      "customLength": 12
     }
   ]
 }

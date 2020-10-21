@@ -28,7 +28,8 @@
                     });
 
             const loginScene = sceneManager.createScene('login', 'Login').add(
-                ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search')).getComponent(),
+                ConvenientForms.LOGIN_FORM_BUILDER((creds) => sceneManager.routeTo('search'))
+                    .getComponent(),
                 Position.CENTER
             );
 
@@ -54,7 +55,13 @@
                                         .then(response => response.json()), StringValidators.NOT_EMPTY),
                                     new NumberFormEntry('quantity', item.quantity, 'Quantity', new Validator('Enter a number greater than 0', (val) => val < 1)),
                                     new TextFormEntry('cover', item.cover, 'Cover', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/))
-                                ), 'Add Battery', ArrayValidators.NOT_EMPTY).setDisabled(true)
+                                )
+                                .addReaction(
+                                    new TextFormEntry('customized', item.customized, 'Customized', new RegexValidator('Please enter Y or N', /^(?:Y\b|N\b)/)),
+                                    new NumberFormEntry('customLength', item.customLength, 'Custom Length', StringValidators.NOT_EMPTY, new Validator('Enter a number greater than 0', (val) => val < 1)),
+                                    (textFormOutput) =>  textFormOutput === 'Y' 
+                                )
+                            , 'Add Battery', ArrayValidators.NOT_EMPTY).setDisabled(true)
                     ).getComponent()
                     , Position.CENTER);
             };
@@ -63,7 +70,7 @@
 
             model.addObserver(orderScene);
 
-            sceneManager.routeTo('login');
+            sceneManager.routeTo('search');
         };
     </script>
 </head>
