@@ -191,3 +191,6 @@ body {
   border-width: var(--border-width-thin);
   border-style: solid;
 }
+.end {
+  align-self: end;
+}

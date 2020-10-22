@@ -29,7 +29,10 @@ const StringValidators = {
 }
 
 const ArrayValidators = {
-  NOT_EMPTY: new Validator("Required", (val) => !val || !JSON.parse(val).length)
+  NOT_EMPTY: new Validator("Required", (val) =>
+    !val || !JSON.parse(val).length
+  )
+
 }
 
 const DateValidators = {
@@ -129,6 +132,65 @@ class BaseInputFormEntry extends BaseFormEntry {
   setDisabled(disabled) {
     this.inputComponent.setDisabled(disabled);
     return this;
+  }
+}
+class BaseArrayFormEntry extends BaseInputFormEntry {
+  constructor(key, value, label, addLabel) {
+    super(key, value, label, new TextField(""));
+    this.component.remove(this.inputComponent);
+    this.inputContainer = new Container();
+    this.childrenContainer = new Container(new GridLayout(2));
+    this.inputContainer.add(this.childrenContainer, Position.CENTER);
+    this.children = [];
+    this.value.forEach(item => {
+      this.supplyChild(item);
+    });
+    this.inputContainer.add(new Button(addLabel).addActionListener(e => this.supplyChild()), Position.SOUTH);
+    this.component.add(this.inputContainer, Position.CENTER);
+    this.arrayLevelValidators = [];
+    this.elementLevelValidators = [];
+  }
+  addArrayLevelValidators(...arrayLevelValidators) {
+    this.arrayLevelValidators = this.arrayLevelValidators.concat(...arrayLevelValidators);
+    return this;
+  }
+  addElementLevelValidators(...elementLevelValidators) {
+    this.elementLevelValidators = this.elementLevelValidators.concat(...elementLevelValidators);
+    return this;
+  }
+  supplyChild(val) {
+    throw 'abstract BaseArrayFormEntry';
+  }
+  getValue() {
+    return `[${this.children.map(child => `${JSON.stringify(child.getValue())}`)}]`;
+  }
+  getObject() {
+    return `"${this.key}": ${this.getValue() ? `${this.getValue()}` : '[]'}`;
+  }
+  getValidationErrors() {
+    
+    return []; //TODO
+  }
+}
+class TextArrayFormEntry extends BaseArrayFormEntry {
+  constructor(key, value, label, addLabel) {
+    super(key, value, label, addLabel);
+  }
+  supplyChild(val) {
+    const textField = new TextFormEntry('', val, '');
+      this.children.push(textField);
+
+      const container = new Container()
+        .add(textField.getComponent(), Position.CENTER)
+        .add(new Button("X", CommonClasses.WARNING, 'end')
+          .addActionListener(e => {
+            this.children.splice(this.children.indexOf(textField), 1);
+            this.childrenContainer.remove(container)
+          })
+          ,
+          Position.EAST
+        );
+      this.childrenContainer.add(container);
   }
 }
 class TextFormEntry extends BaseInputFormEntry {
@@ -234,16 +296,16 @@ class FormEntryGroup extends BaseFormEntry {
   }
   addReaction(formEntry, dependentFormEntry, shouldDisplayFunction) {
     this.addChildren(formEntry);
-    shouldDisplayFunction(formEntry.getValue()) ? 
-      this.addChildren(dependentFormEntry) 
+    shouldDisplayFunction(formEntry.getValue()) ?
+      this.addChildren(dependentFormEntry)
       : this.removeChild(dependentFormEntry)
-    formEntry.addActionListener(v => shouldDisplayFunction(v) ? 
-      this.addChildren(dependentFormEntry) 
+    formEntry.addActionListener(v => shouldDisplayFunction(v) ?
+      this.addChildren(dependentFormEntry)
       : this.removeChild(dependentFormEntry));
     return this;
   }
   removeChild(formEntry) {
-    if(!this.children.includes(formEntry)) {
+    if (!this.children.includes(formEntry)) {
       return;
     }
     this.children.splice(this.children.indexOf(formEntry), 1);
@@ -296,12 +358,12 @@ class SubmissionForm extends FormEntryGroup {
     return this;
   }
   removeChild(formEntry) {
-    if(!this.children.includes(formEntry)) {
+    if (!this.children.includes(formEntry)) {
       return;
     }
     this.center.removeAll();
     this.validationErrorsContainer.removeAll();
-    
+
     this.children.splice(this.children.indexOf(formEntry), 1);
     this.children.forEach((child) => {
       this.center.add(child.getComponent());
@@ -370,12 +432,12 @@ class FormEntryGroupArray extends FormEntryGroup {
     return this;
   }
   removeChild(formEntry) {
-    if(!this.children.includes(formEntry)) {
+    if (!this.children.includes(formEntry)) {
       return;
     }
     this.center.removeAll();
     this.validationErrorsContainer.removeAll();
-    
+
     this.children.splice(this.children.indexOf(formEntry), 1);
     this.children.forEach((child) => {
       this.center.add(child.getComponent());
