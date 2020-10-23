@@ -108,7 +108,6 @@ body {
   grid-template-areas:
     "north north  north"
     "west    center east"
-    "west    center east"
     "south south  south";
 }
 .ncs-layout {
@@ -191,6 +190,6 @@ body {
   border-width: var(--border-width-thin);
   border-style: solid;
 }
-.end {
-  align-self: end;
+.start {
+  align-self: start;
 }

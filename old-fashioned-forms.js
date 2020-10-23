@@ -142,13 +142,13 @@ class BaseArrayFormEntry extends BaseInputFormEntry {
     this.childrenContainer = new Container(new GridLayout(2));
     this.inputContainer.add(this.childrenContainer, Position.CENTER);
     this.children = [];
+    this.arrayLevelValidators = [];
+    this.elementLevelValidators = [];
     this.value.forEach(item => {
       this.supplyChild(item);
     });
     this.inputContainer.add(new Button(addLabel).addActionListener(e => this.supplyChild()), Position.SOUTH);
     this.component.add(this.inputContainer, Position.CENTER);
-    this.arrayLevelValidators = [];
-    this.elementLevelValidators = [];
   }
   addArrayLevelValidators(...arrayLevelValidators) {
     this.arrayLevelValidators = this.arrayLevelValidators.concat(...arrayLevelValidators);
@@ -156,6 +156,7 @@ class BaseArrayFormEntry extends BaseInputFormEntry {
   }
   addElementLevelValidators(...elementLevelValidators) {
     this.elementLevelValidators = this.elementLevelValidators.concat(...elementLevelValidators);
+    this.children.forEach(child => child.validators.push(...elementLevelValidators));
     return this;
   }
   supplyChild(val) {
@@ -168,8 +169,14 @@ class BaseArrayFormEntry extends BaseInputFormEntry {
     return `"${this.key}": ${this.getValue() ? `${this.getValue()}` : '[]'}`;
   }
   getValidationErrors() {
-    
-    return []; //TODO
+    this.validationErrorsContainer.removeAll();
+    const arrayLevelValidationErrors = this.arrayLevelValidators.filter((validator) =>
+      validator.invalid(this.getValue())
+    );
+    arrayLevelValidationErrors.forEach((error) =>
+      this.validationErrorsContainer.add(new Label(error.label, FormClasses.INVALID, FormClasses.FORM_LABEL))
+    );
+    return arrayLevelValidationErrors.concat(this.children.reduce((pre, cur) => pre.concat(cur.getValidationErrors()), []));
   }
 }
 class TextArrayFormEntry extends BaseArrayFormEntry {
@@ -177,20 +184,22 @@ class TextArrayFormEntry extends BaseArrayFormEntry {
     super(key, value, label, addLabel);
   }
   supplyChild(val) {
-    const textField = new TextFormEntry('', val, '');
-      this.children.push(textField);
+    const textField = new TextFormEntry('', val, '', this.elementLevelValidators);
+    this.children.push(textField);
 
-      const container = new Container()
-        .add(textField.getComponent(), Position.CENTER)
-        .add(new Button("X", CommonClasses.WARNING, 'end')
-          .addActionListener(e => {
-            this.children.splice(this.children.indexOf(textField), 1);
-            this.childrenContainer.remove(container)
-          })
-          ,
-          Position.EAST
-        );
-      this.childrenContainer.add(container);
+    const container = new Container()
+      .add(textField.getComponent(), Position.CENTER)
+      .add(new Button("X", CommonClasses.WARNING, 'start')
+        .addActionListener(e => {
+          this.children.splice(this.children.indexOf(textField), 1);
+          this.childrenContainer.remove(container)
+          this.getValidationErrors();
+        })
+        ,
+        Position.EAST
+      );
+    this.childrenContainer.add(container);
+    this.getValidationErrors();
   }
 }
 class TextFormEntry extends BaseInputFormEntry {
