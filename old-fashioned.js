@@ -18,7 +18,8 @@ const Position = {
 const LayoutType = {
   BORDER_LAYOUT: "border-layout",
   GRID_LAYOUT: "grid-layout",
-  NCS_LAYOUT: "ncs-layout"
+  NCS_LAYOUT: "ncs-layout",
+  FLEX_LAYOUT: "flex-layout"
 }
 class Layout {
 

@@ -38,20 +38,22 @@
 }
 body {
   margin: 0;
+  background-color: var(--main-bg-color);
 }
 .scene {
   min-height: 100vh;
   width: auto;
+  max-width: 100vw;
 }
 .container {
-  display: grid;
   background-color: var(--main-bg-color);
 }
 .component {
   width: 100%;
+  max-width: 100vw;
   box-sizing: border-box;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-  justify-self: center;
+  justify-self: start;
   align-self: start;
   font-size: var(--main-font-size);
   overflow-wrap: anywhere;
@@ -69,7 +71,7 @@ body {
   border-radius: var(--border-radius);
   border-width: var(--border-width-thin);
   border-style: solid;
-  align-self: center;
+  align-self: start;
 }
 .label,
 .button {
@@ -104,19 +106,26 @@ body {
 
 .border-layout {
   display: grid;
-  grid-template-columns: min(var(--padding-thick), max-content) 1fr max-content;
+  grid-template-columns: max-content minmax(min-content, 1600px) max-content;
   grid-template-areas:
     "north north  north"
     "west    center east"
     "south south  south";
 }
+.flex-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
 .ncs-layout {
+  
   display: grid;
   grid-template-columns: 1fr;
   grid-template-areas:
-    "north"
-    "center"
-    "south";
+    " north  "
+    "    center "
+    " south  ";
 }
 .north {
   grid-area: north;

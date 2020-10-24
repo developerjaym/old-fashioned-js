@@ -69,6 +69,15 @@ class NcsLayout extends Layout {
   }
 }
 
+class FlexLayout extends Layout {
+  constructor() {
+    super(LayoutType.FLEX_LAYOUT);
+  }
+  getStyle() {
+    return ``;
+  }
+}
+
 class BaseFormEntry {
   constructor(key, value, label, ...validators) {
     this.key = key;
@@ -98,7 +107,7 @@ class BaseFormEntry {
 class BaseInputFormEntry extends BaseFormEntry {
   constructor(key, value, label, inputComponent, ...validators) {
     super(key, value, label, ...validators);
-    this.component = new Container(new NcsLayout());
+    this.component = new Container(new FlexLayout());
     this.inputComponent = inputComponent;
     this.inputComponent.addActionListener((v) => {
       this.getValidationErrors();
@@ -345,8 +354,8 @@ class SubmissionForm extends FormEntryGroup {
     this.center = new Container(new GridLayout(1));
     this.component
       .add(new Label(this.label, FontSize.FIRST_HEADER), Position.NORTH)
-      .add(this.submissionButton, Position.SOUTH)
-      .add(this.center, Position.CENTER);
+      .add(this.center, Position.CENTER)
+      .add(this.submissionButton, Position.SOUTH);
   }
   submit() {
     const valid = this.children.reduce((pre, cur) => {
@@ -417,8 +426,8 @@ class FormEntryGroupArray extends FormEntryGroup {
       .add(new Container()
         .add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
         .add(this.validationErrorsContainer, Position.CENTER), Position.NORTH)
-      .add(this.addInputButton, Position.SOUTH)
-      .add(this.center, Position.CENTER);
+        .add(this.center, Position.CENTER)
+        .add(this.addInputButton, Position.SOUTH);
     if (this.value && this.value.length) {
       this.value.forEach((item) => {
         const childGroup = this.formEntrySupplier(item, this.children.length + 1);
