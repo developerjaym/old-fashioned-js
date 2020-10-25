@@ -89,25 +89,35 @@ class BaseInputFormEntry extends BaseFormEntry {
     super(key, value, label, ...validators);
     this.component = new Container(new FlexLayout());
     this.inputComponent = inputComponent;
+    this.changed = true;
+    this.validationErrors = [];
     this.inputComponent.addActionListener((v) => {
+      this.changed = true;
       this.getValidationErrors();
       this.actionListeners.forEach(listener => listener(v));
     });
     this.validationErrorsContainer = new Container(
       new GridLayout(1)
     );
-    this.component
-      .add(new Label(this.label, FormClasses.FORM_LABEL).setFor(this.inputComponent), Position.NORTH)
-      .add(this.inputComponent, Position.CENTER)
+    if (this.label) {
+      this.component
+        .add(new Label(this.label, FormClasses.FORM_LABEL).setFor(this.inputComponent), Position.NORTH);
+    }
+    this.component.add(this.inputComponent, Position.CENTER)
       .add(this.validationErrorsContainer, Position.SOUTH);
   }
   getValidationErrors() {
+    if (!this.changed) {
+      console.log('being fast');
+      return this.validationErrors;
+    }
     this.validationErrorsContainer.removeAll();
-    const validationErrors = super.getValidationErrors();
-    validationErrors.forEach((error) =>
+    this.validationErrors = super.getValidationErrors();
+    this.validationErrors.forEach((error) =>
       this.validationErrorsContainer.add(new Label(error.label, FormClasses.INVALID, FormClasses.FORM_LABEL))
     );
-    return validationErrors;
+    this.changed = false;
+    return this.validationErrors;
   }
   getValue() {
     return this.inputComponent.getValue();
@@ -406,8 +416,8 @@ class FormEntryGroupArray extends FormEntryGroup {
       .add(new Container()
         .add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
         .add(this.validationErrorsContainer, Position.CENTER), Position.NORTH)
-        .add(this.center, Position.CENTER)
-        .add(this.addInputButton, Position.SOUTH);
+      .add(this.center, Position.CENTER)
+      .add(this.addInputButton, Position.SOUTH);
     if (this.value && this.value.length) {
       this.value.forEach((item) => {
         const childGroup = this.formEntrySupplier(item, this.children.length + 1);

@@ -128,7 +128,7 @@ class Component extends Observer {
   constructor(...classes) {
     super();
     this.classes = ["component"].concat(...classes);
-    this.id = `${this.classes.reverse()[0]}${Math.floor(
+    this.id = `${this.classes[0]}${Math.floor(
       Math.random() * 1000000000
     )}`;
     this.parent = null;
@@ -150,7 +150,7 @@ class Component extends Observer {
   }
   addClasses(...classes) {
     this.classes.push(...classes);
-    this.e.classList.add(...classes.reverse());
+    this.e.classList.add(...classes);
     return this;
   }
 
@@ -169,7 +169,7 @@ class Container extends Component {
     this.disabled = false;
 
     this.e = BAR.e("div");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.setAttribute("id", this.id);
     this.e.style.cssText += this.layout.getStyle();
   }
@@ -229,7 +229,7 @@ class ImageLabel extends Component {
     this.width = width;
     this.height = height;
     this.e = BAR.e("div");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     let heightWidth = "";
     if (this.height) {
       heightWidth = `height: ${this.height}; `;
@@ -248,7 +248,7 @@ class LongText extends Component {
   constructor(text, ...classes) {
     super(["long-text"].concat(...classes));
     this.e = BAR.e("div");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.appendChild;
     text
       .split("\n")
@@ -266,7 +266,7 @@ class Label extends Component {
   constructor(text, ...classes) {
     super(["label"].concat(...classes));
     this.e = BAR.e("label");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.innerText = text;
     this.e.setAttribute("id", this.id);
   }
@@ -283,7 +283,7 @@ class BaseInputComponent extends Component {
     this.actionListeners = [];
 
     this.e = BAR.e("input");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.setAttribute("id", this.id);
     this.e.value = value || "";
     this.e.addEventListener("input", (e) => {
@@ -339,7 +339,7 @@ class Button extends BaseInputComponent {
     this.actionListeners = [];
 
     this.e = BAR.e("button");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.setAttribute("id", this.id);
     this.e.innerText = value;
     this.e.addEventListener("click", (e) =>
@@ -365,7 +365,7 @@ class TextArea extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textarea"].concat(...classes));
     this.e = BAR.e("textarea");
-    this.e.classList.add(...this.classes.reverse());
+    this.e.classList.add(...this.classes);
     this.e.setAttribute("id", this.id);
     this.e.value = text || "";
     this.e.addEventListener("input", (e) => {
@@ -401,7 +401,7 @@ class ColorField extends BaseInputComponent {
 
 class Scene extends Container {
   constructor(route, title = "Scene") {
-    super(new BorderLayout(), "scene");
+    super(new NcsLayout(), "scene");
     this.title = title;
     this.id = route;
     this.e.setAttribute("id", this.id);
