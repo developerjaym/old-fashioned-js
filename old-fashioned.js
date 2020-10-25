@@ -6,7 +6,8 @@ const BAR = {
 const CommonClasses = {
   DISABLED: "disabled",
   HIDDEN: "hidden",
-  WARNING: "warning"
+  WARNING: "warning",
+  SMALL_CONTAINER: "width-360"
 }
 const Position = {
   NORTH: "north",
@@ -14,6 +15,10 @@ const Position = {
   SOUTH: "south",
   WEST: "west",
   CENTER: "center"
+}
+const LayoutDirection = {
+  ROW: "row",
+  COLUMN: "column"
 }
 const LayoutType = {
   BORDER_LAYOUT: "border-layout",
@@ -56,6 +61,29 @@ class BorderLayout extends Layout {
   add(newComponent, containerComponents, ...constraints) {
     newComponent.addClasses(constraints[0]);
     containerComponents[`${constraints[0]}`] = newComponent;
+  }
+}
+
+class NcsLayout extends Layout {
+  constructor() {
+    super(LayoutType.NCS_LAYOUT);
+  }
+  getStyle() {
+    return ``;
+  }
+  add(newComponent, containerComponents, ...constraints) {
+    newComponent.addClasses(constraints[0]);
+    containerComponents[`${constraints[0]}`] = newComponent;
+  }
+}
+
+class FlexLayout extends Layout {
+  constructor(direction = LayoutDirection.COLUMN) {
+    super(LayoutType.FLEX_LAYOUT);
+    this.direction = direction;
+  }
+  getStyle() {
+    return `flex-direction: ${this.direction}`;
   }
 }
 

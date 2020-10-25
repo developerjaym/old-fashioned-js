@@ -106,7 +106,8 @@ body {
 
 .border-layout {
   display: grid;
-  grid-template-columns: max-content minmax(min-content, 1600px) max-content;
+  grid-template-columns: 1fr minmax(min-content, 1600px) 1fr;
+  /* grid-template-columns: max-content minmax(min-content, 1600px) max-content; */
   grid-template-areas:
     "north north  north"
     "west    center east"
@@ -115,8 +116,9 @@ body {
 .flex-layout {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
+  flex-wrap: wrap;
 }
 .ncs-layout {
   
@@ -201,4 +203,7 @@ body {
 }
 .start {
   align-self: start;
+}
+.width-360 {
+  max-width: 360px;
 }

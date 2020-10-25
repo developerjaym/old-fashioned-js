@@ -56,27 +56,7 @@ const DateValidators = {
   AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())
 }
 
-class NcsLayout extends Layout {
-  constructor() {
-    super(LayoutType.NCS_LAYOUT);
-  }
-  getStyle() {
-    return ``;
-  }
-  add(newComponent, containerComponents, ...constraints) {
-    newComponent.addClasses(constraints[0]);
-    containerComponents[`${constraints[0]}`] = newComponent;
-  }
-}
 
-class FlexLayout extends Layout {
-  constructor() {
-    super(LayoutType.FLEX_LAYOUT);
-  }
-  getStyle() {
-    return ``;
-  }
-}
 
 class BaseFormEntry {
   constructor(key, value, label, ...validators) {
@@ -148,7 +128,7 @@ class BaseArrayFormEntry extends BaseInputFormEntry {
     super(key, value, label, new TextField(""));
     this.component.remove(this.inputComponent);
     this.inputContainer = new Container();
-    this.childrenContainer = new Container(new GridLayout(2));
+    this.childrenContainer = new Container(new FlexLayout(LayoutDirection.ROW));
     this.inputContainer.add(this.childrenContainer, Position.CENTER);
     this.children = [];
     this.arrayLevelValidators = [];
@@ -196,7 +176,7 @@ class TextArrayFormEntry extends BaseArrayFormEntry {
     const textField = new TextFormEntry('', val, '', this.elementLevelValidators);
     this.children.push(textField);
 
-    const container = new Container()
+    const container = new Container(new BorderLayout(), CommonClasses.SMALL_CONTAINER)
       .add(textField.getComponent(), Position.CENTER)
       .add(new Button("X", CommonClasses.WARNING, 'start')
         .addActionListener(e => {
