@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+    <script>
+        window.onload = () => {
+            const sceneManager = new SceneManager();
+
+            const triviaScene = sceneManager.createScene('trivia', 'Trivia');
+            triviaScene.add(
+                new SubmissionForm('Trivia', (o) => {
+                    o.id = `${Math.floor(Math.random() * Math.floor(100000))}`;
+                    o.questions.forEach((q, i) => q.id = i);
+                    sceneManager
+                        .createScene('confirmation', 'Old Fashioned Confirmation')
+                        .add(new TextArea(JSON.stringify(o, null, 2)), Position.CENTER).add(new Label('Confirmation', FontSize.FIRST_HEADER), Position.NORTH);
+                    sceneManager.routeTo('confirmation');
+                }, 'Generate JSON').addChildren(
+                    new TextFormEntry('name', '', 'Name', StringValidators.NOT_EMPTY),
+                    new TextArrayFormEntry('categories', [], 'Categories', 'Add Category').addArrayLevelValidators(ArrayValidators.NOT_EMPTY).addElementLevelValidators(StringValidators.NOT_EMPTY),
+                    new NumberFormEntry('difficulty', 1, 'Difficulty', new Validator('Enter a number between 1 and 5', (val) => val < 1 || val > 5)),
+
+                    new FormEntryGroupArray('questions', '', 'Questions',
+                        (item, counter) => new FormEntryGroup(
+                            'question',
+                            {},
+                            'Question ' + counter
+                            ,new Validator('Multiple choice questions require options',
+                                (val) => {
+                                    val = JSON.parse(val);
+                                    if(val.answerType === "ORDERED CHOICE ANSWER TYPE" || val.answerType === "MULTIPLE CHOICE ANSWER TYPE") {
+                                        return !val.options || val.options.length === 0; // fail validation if there are no options but should be
+                                    }
+                                })
+                                )
+                            .addChildren(
+                                new TextFormEntry('prompt', '', 'Prompt'),
+                                new TextArrayFormEntry('hints', [], 'Hints', 'Add Hint').addElementLevelValidators(StringValidators.NOT_EMPTY),
+                                new TextArrayFormEntry('acceptableAnswers', [], 'Acceptable Answers', 'Add Acceptable Answer').addElementLevelValidators(StringValidators.NOT_EMPTY),
+                                new TextArrayFormEntry('options', [], 'Options', 'Add Option').addElementLevelValidators(StringValidators.NOT_EMPTY),
+                                new TextFormEntry('displayAnswer', '', 'Display Answer', StringValidators.NOT_EMPTY),
+                                new DropdownListFormEntry('answerType', '', 'Answer Type', new Promise(done => done([
+                                    "FREE RESPONSE ANSWER TYPE",
+                                    "MULTIPLE CHOICE ANSWER TYPE",
+                                    "ORDERED CHOICE ANSWER TYPE",
+                                    "LIST ANSWER TYPE",
+                                    "PRICE ANSWER TYPE"
+                                ])), StringValidators.NOT_EMPTY),
+                                new DropdownListFormEntry('promptType', '', 'Prompt Type', new Promise(done => done([
+                                    "TEXT PROMPT TYPE",
+                                    "AUDIO PROMPT TYPE",
+                                    "IMAGE PROMPT TYPE"
+                                ])), StringValidators.NOT_EMPTY),
+                                new NumberFormEntry('pointValue', '', 'Point Value', new Validator('Enter a number between 1 and 5', (val) => val < 1 || val > 5))
+                            )
+                        , 'Add Question', ArrayValidators.NOT_EMPTY)
+                ).getComponent()
+                , Position.CENTER);
+
+            sceneManager.routeTo('trivia');
+        };
+    </script>
+</head>
+
+<body>
+    <div id="glass"></div>
+</body>
+
+</html>

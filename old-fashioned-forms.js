@@ -282,7 +282,7 @@ class FormEntryGroup extends BaseFormEntry {
   addChildren(...formEntry) {
     this.component.removeAll();
     if (this.removableGroup) {
-      this.component.add(new Container().add(
+      this.component.add(new Container(new NcsLayout()).add(
         new Label(this.label, FontSize.SECOND_HEADER), Position.CENTER
       )
         .add(
@@ -413,7 +413,7 @@ class FormEntryGroupArray extends FormEntryGroup {
     });
     this.center = new Container(new GridLayout(1));
     this.component
-      .add(new Container()
+      .add(new Container(new NcsLayout())
         .add(new Label(this.label, FontSize.SECOND_HEADER), Position.NORTH)
         .add(this.validationErrorsContainer, Position.CENTER), Position.NORTH)
       .add(this.center, Position.CENTER)

@@ -36,16 +36,13 @@
 
   --svg-dimension: 240px;
 }
-body {
-  margin: 0;
-  background-color: var(--main-bg-color);
-}
-* {
+
+#glass * {
   box-sizing: border-box;
 }
 .component {
   width: 100%;
-  max-width: 90vw;
+  max-width: calc(min(100vw, 900px) - calc(48px + 2 * var(--padding-thick)));
   box-sizing: border-box;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
   justify-self: start;
@@ -76,6 +73,9 @@ body {
   text-align: center;
   padding: var(--padding-thick);
   width: auto;
+}
+.label {
+  padding: 0;
 }
 .long-text {
   max-width: 600px;
@@ -205,14 +205,27 @@ body {
 }
 .scene {
   min-height: 100vh;
-  width: auto;
-  max-width: calc(100vw - 48px);
+  width: min(100vw, 900px);
+  max-width: calc(min(100vw, 900px) - 48px);
   padding: 0 var(--padding-thick) 0 var(--padding-thick);
+  align-self: center;
   
 }
-
+body {
+  margin: 0;
+  background-color: var(--main-bg-color);
+}
+#glass {
+  /*causes performance issues in Chromium browsers*/
+  /* display: flex;
+  flex-direction: column; */
+}
 @media print {
   .button, .warning, .invalid {
+    display: none;
+  }
+  .container:empty {
+    /* To prevent Chromium printing bug with empty flex rows*/
     display: none;
   }
 }
