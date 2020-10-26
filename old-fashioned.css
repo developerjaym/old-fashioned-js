@@ -48,7 +48,7 @@
   justify-self: start;
   align-self: start;
   font-size: var(--main-font-size);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .container {
   background-color: var(--main-bg-color);
@@ -227,5 +227,13 @@ body {
   .container:empty {
     /* To prevent Chromium printing bug with empty flex rows*/
     display: none;
+  }
+}
+@media only screen and (max-width: 768px) {
+  .scene {
+    padding: 0 var(--padding-narrow) 0 var(--padding-narrow);
+  }
+  .label, .button {
+    padding: var(--padding-narrow);
   }
 }
