@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+
+</head>
+
+<body id="glass">
+</body>
+<script>
+    const sceneManager = new SceneManager();
+    const loadingScene = sceneManager.createScene('loading', 'Loading Fun...').add(
+        new Label('Please wait for good fun to arrive from a distant server...', FontSize.FIRST_HEADER)
+    );
+    const resultsScene = sceneManager.createScene('trivia-results', 'Results').add(new Label("Results!", FontSize.FIRST_HEADER), Position.NORTH);
+    resultsScene.setResults = (results) => {
+        resultsScene.removeAll();
+        resultsScene.add(
+            new TextArea(JSON.stringify(results, null, 2), FontSize.SECOND_HEADER), Position.CENTER
+        );
+    }
+    sceneManager.routeTo('loading');
+
+    fetch('https://jayckers.com/trivia/test.json')
+        .then(response => response.json())
+        .then(response => response.find(quiz => quiz.id === '3507444'))
+        .then(quiz => {
+            const results = {};
+            for (let question of quiz.questions) {
+                const submissionForm = new SubmissionForm(`Question ${question.id + 1}`,
+                    (answer) => {
+                        results[`${question.id}`] = [question.displayAnswer].concat(...question.acceptableAnswers).map(a => a.toLowerCase()).includes(answer.answer.toLowerCase()) ? question.pointValue : 0;
+                        resultsScene.setResults(results);
+                        alert(`The correct answer is ${question.displayAnswer}. +${results[`${question.id}`]}`);
+                        const newRoute = question.id >= quiz.questions.length - 1 ? `trivia-results` : `question-${question.id + 2}`;
+                        sceneManager.routeTo(newRoute);
+                    }
+                    , 'Final Answer')
+                    .addChildren(
+                        new TextFormEntry('answer', '', question.prompt, StringValidators.NOT_EMPTY)
+                    )
+                    .setDisabled(results[`${question.id}`]);
+                const questionScene = sceneManager.createScene(`question-${question.id + 1}`, `Question ${question.id + 1}`).add(
+                    submissionForm.getComponent()
+                );
+            }
+            sceneManager.routeTo(`question-1`);
+        });
+</script>
+
+</html>

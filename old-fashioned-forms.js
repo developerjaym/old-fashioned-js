@@ -108,8 +108,7 @@ class BaseInputFormEntry extends BaseFormEntry {
   }
   getValidationErrors() {
     if (!this.changed) {
-      console.log('being fast');
-      return this.validationErrors;
+       return this.validationErrors;
     }
     this.validationErrorsContainer.removeAll();
     this.validationErrors = super.getValidationErrors();
@@ -199,6 +198,14 @@ class TextArrayFormEntry extends BaseArrayFormEntry {
       );
     this.childrenContainer.add(container);
     this.getValidationErrors();
+  }
+}
+class CheckboxFormEntry extends BaseInputFormEntry {
+  constructor(key, value, label, ...validators) {
+    super(key, value, label, new Checkbox(value || false), ...validators);
+  }
+  getObject() {
+    return `"${this.key}": ${this.getValue() ? `${this.getValue()}` : false}`;
   }
 }
 class TextFormEntry extends BaseInputFormEntry {

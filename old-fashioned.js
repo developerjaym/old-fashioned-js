@@ -286,13 +286,14 @@ class BaseInputComponent extends Component {
     this.e.classList.add(...this.classes);
     this.e.setAttribute("id", this.id);
     this.e.value = value || "";
-    this.e.addEventListener("input", (e) => {
+    this.inputListener = (e) => {
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
           listener(e.target.value);
         }
       });
-    });
+    };
+    this.e.addEventListener("input", this.inputListener);
   }
   addActionListener(actionListener) {
     this.actionListeners.push(actionListener);
@@ -344,6 +345,33 @@ class Button extends BaseInputComponent {
     this.e.innerText = value;
     this.e.addEventListener("click", (e) =>
       this.actionListeners.forEach((listener) => listener()));
+  }
+}
+
+class Checkbox extends BaseInputComponent {
+  constructor(value, ...classes) {
+    super(value, ["checkbox"].concat(...classes));
+    this.e.setAttribute("type", "checkbox");
+    if(value) {
+      this.e.setAttribute("checked", true);
+    } else {
+      this.e.removeAttribute("checked");
+    }
+    this.inputListener = (e) => {
+      this.actionListeners.forEach((listener) => {
+        if (!this.disabled) {
+          if(e.target.checked) {
+            this.e.setAttribute("checked", true);
+          } else {
+            this.e.removeAttribute("checked");
+          }
+          listener(e.target.checked);
+        }
+      });
+    };
+  }
+  getValue() {
+    return this.e.checked;
   }
 }
 

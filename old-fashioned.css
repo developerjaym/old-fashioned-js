@@ -55,9 +55,6 @@
   column-gap: var(--margin-narrow);
   row-gap: var(--margin-narrow);
 }
-
-
-
 .input-component {
   padding: var(--padding-narrow);
   border-color: var(--main-fg-color);
@@ -84,6 +81,11 @@
 }
 .textarea {
   min-height: calc(12 * var(--main-font-size));
+}
+.checkbox {
+  height: calc(1.5 * var(--main-font-size));
+  width: calc(1.5 * var(--main-font-size));
+  align-self: flex-start;
 }
 .invalid {
   color: var(--error-fg-color);

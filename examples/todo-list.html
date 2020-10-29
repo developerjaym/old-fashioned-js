@@ -23,9 +23,10 @@
                     (item, counter) => new FormEntryGroup('item', {}, 'Item ' + counter).removable()
                         .addChildren(
                             new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),
+                            new CheckboxFormEntry('done', item.done, 'Done'),
                             new DropdownListFormEntry('category', item.category, 'Category',
                                 new Promise(resolve => resolve(['Hobby', 'Work', 'Family']))),
-                            new DateFormEntry('dueDate', item.dueDate, 'Due Date', DateValidators.AFTER_TODAY),
+                            new DateFormEntry('dueDate', item.dueDate, 'Due Date'),
                             new TextAreaFormEntry('description', item.description, 'Description')
                         ), 'Add Item', ArrayValidators.NOT_EMPTY)
             ).getComponent()

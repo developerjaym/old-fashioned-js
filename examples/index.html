@@ -16,7 +16,7 @@
       const sceneManager = new SceneManager();
       const scene = sceneManager.createScene('examples', 'Old Fashioned Examples');
       const scene2 = sceneManager.createScene('image', 'Old Fashioned Image');
-      scene2.add(new Label("Image", FontSize.LARGE), Position.NORTH);
+      scene2.add(new Label("Image", FontSize.FIRST_HEADER), Position.NORTH);
       scene2.add(new ImageLabel("data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9JzMwMHB4JyB3aWR0aD0nMzAwcHgnICBmaWxsPSIjMDAwMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHg9IjBweCIgeT0iMHB4Ij48dGl0bGU+Q29ja3RhaWxfR2xhc3N3YXJlXzAxX1BlcnNwZWN0aXZlPC90aXRsZT48cGF0aCBkPSJNNjkuMDA1OSwxNy4yNjMyQzYzLjkyMzgsMTYuNzcxLDU3LjE3MzgsMTYuNSw1MCwxNi41cy0xMy45MjM4LjI3MS0xOS4wMDU5Ljc2MzJjLTguMDc4Ni43ODI3LTguNzM1OCwxLjc0MzEtOC43MzU4LDIuODI2NmEuOTcuOTcsMCwwLDAsLjAwNjMuMTExOWw2LjM2NzIsNTYuNDc0MUE0LjUzMjMsNC41MzIzLDAsMCwwLDMxLjU0LDgwLjQyLDUyLjY4MjYsNTIuNjgyNiwwLDAsMCw0OS45NTU2LDgzLjVhNTMuMjYwOSw1My4yNjA5LDAsMCwwLDE4LjQ5MzEtMy4wODMsNC41Myw0LjUzLDAsMCwwLDIuOTItMy43NDk1bDYuMzY2My01Ni40NjU4YS45Ny45NywwLDAsMCwuMDA2My0uMTExOUM3Ny43NDE3LDE5LjAwNjMsNzcuMDg0NSwxOC4wNDU5LDY5LjAwNTksMTcuMjYzMlpNNTAsMTguNWMxNC4xMjksMCwyMy4zOTI5LDEuMDI1LDI1LjUzLDEuODYxOEM3Mi45MjU2LDIxLjIxODQsNjMuOTE3MiwyMi4xOCw1MCwyMi4xOHMtMjIuOTI1Ni0uOTYxMy0yNS41My0xLjgxNzlDMjYuNjA3MSwxOS41MjUsMzUuODcxLDE4LjUsNTAsMTguNVpNNjkuMzgxOCw3Ni40NDM0YTIuNTQsMi41NCwwLDAsMS0xLjYzNzIsMi4xMDE1QTUxLjIyMTUsNTEuMjIxNSwwLDAsMSw0OS45NTU2LDgxLjVhNTAuNjUsNTAuNjUsMCwwLDEtMTcuNzA3MS0yLjk1LDIuNTQwNiwyLjU0MDYsMCwwLDEtMS42Mjk0LTIuMDk4NkwyNC40MDEyLDIxLjMwMjlDMjkuOTI4NiwyMy4xMTc3LDQ3LjY1MTIsMjMuMTgsNTAsMjMuMThzMjAuMDcxNC0uMDYyLDI1LjU5ODgtMS44NzY4WiI+PC9wYXRoPjwvc3ZnPg=="
         , "200px", "200px"), Position.WEST);
       
@@ -28,7 +28,8 @@
 
       scene.add(new Button("Click Me"), Position.EAST);
       scene.add(
-        new Label("Welcome to old-fashioned.js", FontSize.LARGE),
+        new Checkbox("check"),
+        // new Label("Welcome to old-fashioned.js", FontSize.FIRST_HEADER),
         Position.NORTH
       );
       const centerContainer = new Container(new GridLayout(2));

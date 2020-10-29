@@ -1,13 +1,10 @@
 /*
 2. Navigation component
-6. Modals/Popups
-7. Pre-built containers/forms/scenes for common use cases
 8. More input types
-   Range
-   Times
-10. More mobile-friendliness, more responsive layouts
-   A collapsing side panel
-11. The 'theme' and the css code aren't very integrated yet.
-13. Grid/Table
-14. I18N
+   Upload
+   Checkbox
+11. Grid/Table
+13. The 'theme' and the css code aren't very integrated yet (probably need a build tool)
+14. I18N (probably need a build tool)
+15. Handle different environments (probably need a build tool)
 */
