@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+    <script src="../old-fashioned-convenience.js"></script>
+    <script src="../old-fashioned-grids.js"></script>
+</head>
+
+<body id="glass">
+
+</body>
+<script>
+    const sceneManager = new SceneManager();
+    const model = new Model();
+    const controller = new Controller(model);
+    controller.refresh = () => {
+        fetch('https://jayckers.com/old-fashioned/examples/batteries.json')
+        .then(response => response.json())
+        .then(data => {
+            controller.onModelUpdate(data);
+        });
+    }
+
+    const gridTable =  new GridTable().addColumns(
+                new Column('shipDate', 'Ship Date'),
+                new Column('address.name', 'Recipient', val => val.toUpperCase()),
+                new Column('address.country', 'Country')
+            )
+            .addActionListener(e => alert('You clicked an order for ' + e.address.name));
+
+    const gridScene = sceneManager.createScene('grid', 'Battery Grid')
+        .add(
+            new Container()
+            .add(new Label("Battery Orders", FontSize.SECOND_HEADER), Position.WEST)
+            .add(new Button("Create New Order").addActionListener(e => BAR.w.location.href = "battery-order-app.html"), Position.EAST)
+            ,Position.NORTH
+        )
+        .add(
+            gridTable
+            ,Position.CENTER
+        )
+        .add(
+            new Button("Refresh").addActionListener((e) => controller.refresh())
+        );
+    model.addObserver(gridTable);
+
+    controller.refresh();
+    
+    sceneManager.routeTo('grid');
+</script>
+
+</html>

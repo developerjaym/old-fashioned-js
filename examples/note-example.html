@@ -53,7 +53,7 @@
 
             listScene.onUpdate = (updatedItems) => {
                 listScene.removeAll();
-                const searchField = new TextField();
+                const searchField = new TextField().setAriaLabel("Search");
                 const searchButton = new Button("Search").addActionListener((e) => controller.onSearch(searchField.getValue()));
                 const submissionForm = new SubmissionForm('Old Fashioned Notes', (o) => controller.onSave(o), "Save")
                         .addChildren(

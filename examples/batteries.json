@@ -1,0 +1,72 @@
+[{
+  "shipDate": "2020-10-05",
+  "address": {
+    "name": "Jay M",
+    "line1": "116 N Main St",
+    "city": "New Bremen",
+    "region": "OH",
+    "country": "US",
+    "postalCode": "45869"
+  },
+  "batteries": [
+    {
+      "batteryModel": "T-1000",
+      "quantity": 2,
+      "cover": "Y",
+      "customized": "N"
+    },
+    {
+      "batteryModel": "T-850",
+      "quantity": 1,
+      "cover": "N",
+      "customized": "Y",
+      "customLength": 12
+    }
+  ]
+},
+{
+  "shipDate": "2020-10-07",
+  "address": {
+    "name": "Lucy H",
+    "line1": "116 N Main St",
+    "city": "New Bremen",
+    "region": "OH",
+    "country": "US",
+    "postalCode": "45869"
+  },
+  "batteries": [
+    {
+      "batteryModel": "TX",
+      "quantity": 7,
+      "cover": "Y",
+      "customized": "N"
+    },
+    {
+      "batteryModel": "T-800",
+      "quantity": 1,
+      "cover": "N",
+      "customized": "Y",
+      "customLength": 12
+    }
+  ]
+},
+{
+  "shipDate": "2020-10-06",
+  "address": {
+    "name": "Iris M",
+    "line1": "116 N Main St",
+    "city": "New Bremen",
+    "region": "OH",
+    "country": "US",
+    "postalCode": "45869"
+  },
+  "batteries": [
+    {
+      "batteryModel": "T-2000",
+      "quantity": 1,
+      "cover": "N",
+      "customized": "N"
+    }
+  ]
+}
+]

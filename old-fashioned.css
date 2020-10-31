@@ -205,6 +205,10 @@
   width: 360px;
   max-width: 360px;
 }
+.cell {
+  width: max-content;
+  text-align: start;
+}
 .scene {
   min-height: 100vh;
   width: min(100vw, 900px);

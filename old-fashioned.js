@@ -1,7 +1,13 @@
 const BAR = {
   doc: document,
   w: window,
-  e: (t) => document.createElement(t)
+  e: (t) => document.createElement(t),
+  e2: (t, id, classes) => {
+    const ele = document.createElement(t);
+    ele.setAttribute("id", id);
+    ele.classList.add(...classes);
+    return ele;
+  }
 };
 const CommonClasses = {
   DISABLED: "disabled",
@@ -24,7 +30,8 @@ const LayoutType = {
   BORDER_LAYOUT: "border-layout",
   GRID_LAYOUT: "grid-layout",
   NCS_LAYOUT: "ncs-layout",
-  FLEX_LAYOUT: "flex-layout"
+  FLEX_LAYOUT: "flex-layout",
+  NO_LAYOUT: "no-layout"
 }
 class Layout {
 
@@ -39,7 +46,14 @@ class Layout {
     containerComponents[`${this.counter++}`] = newComponent;
   }
 }
-
+class NoLayout extends Layout {
+  constructor() {
+    super(LayoutType.NO_LAYOUT);
+  }
+  getStyle() {
+    return ``;
+  }
+}
 class GridLayout extends Layout {
   constructor(width) {
     super(LayoutType.GRID_LAYOUT);
@@ -297,6 +311,10 @@ class BaseInputComponent extends Component {
   }
   addActionListener(actionListener) {
     this.actionListeners.push(actionListener);
+    return this;
+  }
+  setAriaLabel(ariaLabel) {
+    this.e.setAttribute("aria-label", ariaLabel);
     return this;
   }
   getValue() {
