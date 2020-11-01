@@ -27,8 +27,11 @@ class Row extends Container {
     constructor(actionListener) {
         super(new NoLayout(), 'row');
         this.actionListener = actionListener;
+        if(this.actionListener) {
+            this.classes.push('clickable-row');
+        }
         this.e = BAR.e2("tr", this.id, this.classes);
-        this.e.addEventListener("click", (e) => this.actionListener(dataRow));
+        this.e.addEventListener("click", (e) => this.actionListener());
     }
 }
 class Column {
@@ -43,7 +46,7 @@ class Column {
     getCell(dataRow) {
         const keys = this.key.split(".");
         let val = dataRow;
-        for(let key of keys) {
+        for (let key of keys) {
             val = val[key];
         }
         return new Cell(val, CellType.DATA).setTransformer(this.transformer);
@@ -56,7 +59,7 @@ class GridTable extends Container {
         this.columns = [];
 
         this.e = BAR.e2("table", this.id, this.classes);
-        this.headerRow = new Row();//BAR.e2('tr', `${this.id}-th-row`);
+        this.headerRow = new Row();
         this.add(this.headerRow);
         this.rowElements = [];
         this.listeners = [];
@@ -72,10 +75,12 @@ class GridTable extends Container {
     }
     onUpdate(newValue) {
         this.rowElements.forEach(rowElement => this.remove(rowElement));
-        for(let dataRow of newValue) {
-            const rowElement = new Row((e) => this.listeners.forEach(listener => listener(dataRow)));
+        for (let dataRow of newValue) {
+            const rowElement = new Row(
+                this.listeners.length > 0 ? (e) => this.listeners.forEach(listener => listener(dataRow)) : null
+            );
             this.rowElements.push(rowElement);
-            for(let column of this.columns) {
+            for (let column of this.columns) {
                 rowElement.add(column.getCell(dataRow));
             }
             this.add(rowElement);

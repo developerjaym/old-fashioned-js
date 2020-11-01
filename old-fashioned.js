@@ -2,7 +2,7 @@ const BAR = {
   doc: document,
   w: window,
   e: (t) => document.createElement(t),
-  e2: (t, id, classes) => {
+  e2: (t, id, classes = []) => {
     const ele = document.createElement(t);
     ele.setAttribute("id", id);
     ele.classList.add(...classes);
@@ -182,9 +182,7 @@ class Container extends Component {
     this.counter = 0;
     this.disabled = false;
 
-    this.e = BAR.e("div");
-    this.e.classList.add(...this.classes);
-    this.e.setAttribute("id", this.id);
+    this.e = BAR.e2("div", this.id, this.classes);
     this.e.style.cssText += this.layout.getStyle();
   }
 
@@ -242,8 +240,7 @@ class ImageLabel extends Component {
     this.src = src;
     this.width = width;
     this.height = height;
-    this.e = BAR.e("div");
-    this.e.classList.add(...this.classes);
+    this.e = BAR.e2("div", this.id, this.classes);
     let heightWidth = "";
     if (this.height) {
       heightWidth = `height: ${this.height}; `;
@@ -253,16 +250,13 @@ class ImageLabel extends Component {
     }
     this.e.style.cssText += heightWidth + `; background-image: url(${this.src
       }); background-repeat: no-repeat; background-size: contain;`;
-
-    this.e.setAttribute("id", this.id);
   }
 }
 
 class LongText extends Component {
   constructor(text, ...classes) {
     super(["long-text"].concat(...classes));
-    this.e = BAR.e("div");
-    this.e.classList.add(...this.classes);
+    this.e = BAR.e2("div", this.id, this.classes);
     this.e.appendChild;
     text
       .split("\n")
@@ -272,17 +266,14 @@ class LongText extends Component {
         return paragraph;
       })
       .forEach((p) => this.e.appendChild(p));
-    this.e.setAttribute("id", this.id);
   }
 }
 
 class Label extends Component {
   constructor(text, ...classes) {
     super(["label"].concat(...classes));
-    this.e = BAR.e("label");
-    this.e.classList.add(...this.classes);
+    this.e = BAR.e2("label", this.id, this.classes);
     this.e.innerText = text;
-    this.e.setAttribute("id", this.id);
   }
   setFor(inputComponent) {
     this.for = inputComponent.id;
@@ -296,9 +287,7 @@ class BaseInputComponent extends Component {
     super(["input-component"].concat(...classes));
     this.actionListeners = [];
 
-    this.e = BAR.e("input");
-    this.e.classList.add(...this.classes);
-    this.e.setAttribute("id", this.id);
+    this.e = BAR.e2("input", this.id, this.classes);
     this.e.value = value || "";
     this.inputListener = (e) => {
       this.actionListeners.forEach((listener) => {
@@ -341,8 +330,7 @@ class DropdownList extends BaseInputComponent {
     });
     this.e.setAttribute("list", `${this.id}list`);
 
-    this.datalistElement = BAR.e("datalist");
-    this.datalistElement.setAttribute('id', `${this.id}list`);
+    this.datalistElement = BAR.e2("datalist", `${this.id}list`);
     this.e.appendChild(this.datalistElement);
   }
   setDisabled(disabled) {
@@ -357,9 +345,7 @@ class Button extends BaseInputComponent {
     super(value, ["button"].concat(...classes));
     this.actionListeners = [];
 
-    this.e = BAR.e("button");
-    this.e.classList.add(...this.classes);
-    this.e.setAttribute("id", this.id);
+    this.e = BAR.e2("button", this.id, this.classes);
     this.e.innerText = value;
     this.e.addEventListener("click", (e) =>
       this.actionListeners.forEach((listener) => listener()));
@@ -410,9 +396,7 @@ class PasswordField extends BaseInputComponent {
 class TextArea extends BaseInputComponent {
   constructor(text, ...classes) {
     super(text, ["textarea"].concat(...classes));
-    this.e = BAR.e("textarea");
-    this.e.classList.add(...this.classes);
-    this.e.setAttribute("id", this.id);
+    this.e = BAR.e2("textarea", this.id, this.classes);
     this.e.value = text || "";
     this.e.addEventListener("input", (e) => {
       this.actionListeners.forEach((listener) => {

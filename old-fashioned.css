@@ -209,6 +209,15 @@
   width: max-content;
   text-align: start;
 }
+.clickable-row {
+  cursor: pointer;
+}
+.row:nth-child(even) {
+  background-color: white;
+}
+.row:nth-child(odd) {
+  background-color: var(--main-bg-color);
+}
 .scene {
   min-height: 100vh;
   width: min(100vw, 900px);
@@ -222,6 +231,7 @@ body {
   background-color: var(--main-bg-color);
 }
 #glass {
+  margin: 0 auto;
   /*causes performance issues in Chromium browsers*/
   /* display: flex;
   flex-direction: column; */
