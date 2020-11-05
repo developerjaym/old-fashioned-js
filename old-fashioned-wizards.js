@@ -1,7 +1,7 @@
 class WizardForm extends FormEntryGroup {
     constructor(label, onSubmit) {
         super("", {}, label);
-        this.component = new Container(new BorderLayout());
+        this.component = new Container(new BorderLayout(), FormClasses.FORM);
         this.onSubmit = onSubmit;
         this.submissionButton = new Button('Submit');
         this.submissionButton.addActionListener((e) => this.submit());

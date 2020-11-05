@@ -16,7 +16,8 @@
 <script>
     const sceneManager = new SceneManager();
     const loadingScene = sceneManager.createScene('loading', 'Loading Fun...').add(
-        new Label('Please wait for good fun to arrive from a distant server...', FontSize.FIRST_HEADER)
+        new Label('Please wait for good fun to arrive from a distant server...', FontSize.FIRST_HEADER),
+        Position.NORTH
     );
     const resultsScene = sceneManager.createScene('trivia-results', 'Results').add(new Label("Results!", FontSize.FIRST_HEADER), Position.NORTH);
     resultsScene.setResults = (results) => {

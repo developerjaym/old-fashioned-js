@@ -19,39 +19,62 @@
     const sceneManager = new SceneManager();
     const model = new Model();
     const controller = new Controller(model);
-    controller.refresh = () => {
+    controller.refresh = (currentPage, resultsPerPage, searchTerm = '') => {
         fetch('https://jayckers.com/old-fashioned/examples/batteries.json')
-        .then(response => response.json())
-        .then(data => {
-            controller.onModelUpdate(data);
-        });
+            .then(response => response.json())
+            .then(data => {
+                // This is basically functioning as a pretend back end
+                data = data.filter(d => d.address.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                const minIndex = (currentPage-1) * resultsPerPage;
+                const maxIndex = Math.min((minIndex + resultsPerPage), data.length);
+                data = {
+                    content: data.slice(minIndex, maxIndex),
+                    pagination: {
+                        resultsPerPage,
+                        currentPage,
+                        totalCount: data.length
+                    }
+                }
+                controller.onModelUpdate(data);
+            });
     }
 
-    const gridTable =  new GridTable().addColumns(
-                new Column('shipDate', 'Ship Date'),
-                new Column('address.name', 'Recipient', val => val.toUpperCase()),
-                new Column('address.country', 'Country')
-            )
-            .addActionListener(e => alert('You clicked an order for ' + e.address.name));
+    const gridTable = new DecoratedTableBuilder().addColumns(
+        new Column('shipDate', 'Ship Date'),
+        new Column('address.name', 'Recipient', val => val.toUpperCase()),
+        new Column('address.country', 'Country')
+    )
+    .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
+    .addSearch()
+    .addPagination()
+    .addChangeListener(e => {
+        if(e.searchTerm) {
+            e.pagination.currentPage = 1; // go back to first page
+        }
+        controller.refresh(e.pagination.currentPage, e.pagination.resultsPerPage, e.searchTerm);
 
+    })
+    .build();
     const gridScene = sceneManager.createScene('grid', 'Battery Grid')
         .add(
             new Container()
-            .add(new Label("Battery Orders", FontSize.SECOND_HEADER), Position.WEST)
-            .add(new Button("Create New Order").addActionListener(e => BAR.w.location.href = "battery-order-app.html"), Position.EAST)
-            ,Position.NORTH
+                .add(new Label("Battery Orders", FontSize.SECOND_HEADER), Position.WEST)
+                .add(new Button("Create New Order").addActionListener(e => BAR.w.location.href = "battery-order-app.html"), Position.EAST)
+            , Position.NORTH
         )
         .add(
             gridTable
-            ,Position.CENTER
+
+            , Position.CENTER
         )
         .add(
-            new Button("Refresh").addActionListener((e) => controller.refresh())
+            new Button("Refresh").addActionListener((e) => controller.refresh(1, 1)),
+            Position.SOUTH
         );
     model.addObserver(gridTable);
 
-    controller.refresh();
-    
+    controller.refresh(1, 2);
+
     sceneManager.routeTo('grid');
 </script>
 

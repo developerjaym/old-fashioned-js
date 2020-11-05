@@ -163,6 +163,7 @@ class Component extends Observer {
     return this;
   }
   addClasses(...classes) {
+    classes = classes.filter(Boolean);
     this.classes.push(...classes);
     this.e.classList.add(...classes);
     return this;
@@ -280,6 +281,9 @@ class Label extends Component {
     this.e.setAttribute("for", this.for);
     return this;
   }
+  setText(newText) {
+    this.e.innerText = newText;
+  }
 }
 
 class BaseInputComponent extends Component {
@@ -356,7 +360,7 @@ class Checkbox extends BaseInputComponent {
   constructor(value, ...classes) {
     super(value, ["checkbox"].concat(...classes));
     this.e.setAttribute("type", "checkbox");
-    if(value) {
+    if (value) {
       this.e.setAttribute("checked", true);
     } else {
       this.e.removeAttribute("checked");
@@ -364,7 +368,7 @@ class Checkbox extends BaseInputComponent {
     this.inputListener = (e) => {
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
-          if(e.target.checked) {
+          if (e.target.checked) {
             this.e.setAttribute("checked", true);
           } else {
             this.e.removeAttribute("checked");

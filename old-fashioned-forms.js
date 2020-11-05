@@ -1,6 +1,7 @@
 const FormClasses = {
   FORM_LABEL: 'form-label',
-  INVALID: "invalid"
+  INVALID: "invalid",
+  FORM: "form"
 }
 class Validator {
   constructor(label, invalid) {
@@ -344,7 +345,7 @@ class FormEntryGroup extends BaseFormEntry {
 class SubmissionForm extends FormEntryGroup {
   constructor(label, listener, buttonLabel = "Submit") {
     super("", {}, label);
-    this.component = new Container(new NcsLayout());
+    this.component = new Container(new NcsLayout(), FormClasses.FORM);
     this.listener = listener;
     this.submissionButton = new Button(buttonLabel);
     this.submissionButton.addActionListener((e) => this.submit());
