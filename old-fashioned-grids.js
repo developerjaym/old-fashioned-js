@@ -2,6 +2,58 @@ const CellType = {
     HEAD: "th",
     DATA: "td"
 }
+const SortDirection = {
+    OFF: 'off',
+    ASC: 'asc',
+    DESC: 'desc'
+}
+class SortState {
+    constructor(sortDirection) {
+        this.sortDirection = sortDirection;
+    }
+    next() {
+        throw 'abstract sort state';
+    }
+    getSortDirection() {
+        return this.sortDirection;
+    }
+    getIcon() {
+        throw 'abstract sort state';
+    }
+}
+class OffSortState extends SortState {
+    constructor() {
+        super(SortDirection.OFF);
+    }
+    next() {
+        return new AscSortState();
+    }
+    getIcon() {
+        return '⇅';
+    }
+}
+class AscSortState extends SortState {
+    constructor() {
+        super(SortDirection.ASC);
+    }
+    next() {
+        return new DescSortState();
+    }
+    getIcon() {
+        return '↑';
+    }
+}
+class DescSortState extends SortState {
+    constructor() {
+        super(SortDirection.DESC);
+    }
+    next() {
+        return new OffSortState();
+    }
+    getIcon() {
+        return '↓';
+    }
+}
 class Cell extends Component {
     constructor(value, type = CellType.DATA, ...classes) {
         super([type, 'cell'].concat(...classes));
@@ -26,12 +78,32 @@ class Row extends Container {
         this.e.addEventListener("click", (e) => this.actionListener());
     }
 }
-class Column {
+class ColumnDecorator {
+    constructor() {
+        this.listeners = [];
+    }
+    getValue() {
+        return {};
+    }
+    onChange() {
+        this.listeners.forEach(listener => listener(this.getValue()));
+    }
+    addChangeListener(changeListener) {
+        this.listeners.push(changeListener);
+        return this;
+    }
+    onUpdate(message) {
+        this.child.onUpdate(message);
+    }
+}
+class Column extends ColumnDecorator {
     constructor(key, label, transformer = val => val) {
+        super();
         this.key = key;
         this.label = label;
         this.transformer = transformer;
     }
+    onUpdate(message) {}
     getHeader() {
         return new Cell(this.label, CellType.HEAD);
     }
@@ -42,6 +114,54 @@ class Column {
             val = val[key];
         }
         return new Cell(val, CellType.DATA).setTransformer(this.transformer);
+    }
+    getValue() {
+        return {key: this.key};
+    }
+}
+class SortableColumn extends ColumnDecorator {
+    constructor(column, initialSort = SortDirection.OFF) {
+        super();
+        this.child = column;
+        this.child.addChangeListener(e => this.onChange());
+        this.sortButton = new Button('').addActionListener(e => {
+            this.sort = this.sort.next();
+            this.sortButton.setText(this.sort.getIcon());
+            this.onChange();
+        });
+        this.setSort(initialSort);
+    }
+    setSort(sortDirection) {
+        if(sortDirection === SortDirection.ASC) {
+            this.sort = new AscSortState();
+        }
+        else if(sortDirection === SortDirection.DESC) {
+            this.sort = new DescSortState();
+        }
+        else {
+            this.sort = new OffSortState();
+        }
+        this.sortButton.setText(this.sort.getIcon());
+    }
+    onUpdate(columnsMessage) {
+        const thisColumn = columnsMessage.find(col => col.key = this.child.key);
+        if(thisColumn && thisColumn.sort) {
+            this.setSort(thisColumn.sort);
+        }
+        else {
+            this.setSort(SortDirection.OFF);
+        }
+    }
+    getHeader() {
+        return new Container().add(this.child.getHeader(), Position.CENTER).add(this.sortButton, Position.EAST);
+    }
+    getCell(dataRow) {
+        return this.child.getCell(dataRow);
+    }
+    getValue() {
+        const params = this.child.getValue();
+        params.sort = this.sort.getSortDirection();
+        return params;
     }
 }
 class Pagination extends Container {
@@ -69,6 +189,18 @@ class Pagination extends Container {
         this.currentPage = newPagination.currentPage;
         this.maxPage = Math.ceil(newPagination.totalCount / this.resultsPerPage);
         this.label.setText(`Page ${this.currentPage} of ${this.maxPage}`);
+        if (this.maxPage === this.currentPage) {
+            this.remove(this.nextButton);
+        }
+        else {
+            this.add(this.nextButton);
+        }
+        if (this.currentPage === 1) {
+            this.remove(this.backButton);
+        }
+        else {
+            this.add(this.backButton);
+        }
     }
     addPageChangeListener(pageChangeListener) {
         this.pageChangeListener = pageChangeListener;
@@ -124,7 +256,10 @@ class TableImpl extends TableDecorator {
         return this;
     }
     addColumns(...columns) {
-        columns.forEach(column => this.headerRow.add(column.getHeader()));
+        columns.forEach(column => {
+            column.addChangeListener(e => this.onChange());
+            this.headerRow.add(column.getHeader());
+        });
         this.columns.push(...columns);
         return this;
     }
@@ -137,9 +272,19 @@ class TableImpl extends TableDecorator {
             this.rowElements.push(rowElement);
             for (let column of this.columns) {
                 rowElement.add(column.getCell(dataRow));
+                column.onUpdate(newValue.sorts)
             }
             this.add(rowElement);
         }
+    }
+    getValue() {
+        const params = {};
+        const columnParams = [];
+        for(let column of this.columns) {
+            columnParams.push(column.getValue());
+        }
+        params.columns = columnParams;
+        return params;
     }
 }
 
@@ -192,7 +337,7 @@ class TablePagination extends TableDecorator {
 class DecoratedTableBuilder {
     constructor() {
         this.table = new TableImpl();
-        this.changeListener = (e) => {};
+        this.changeListener = (e) => { };
     }
     addRowClickListener(rowClickListener) {
         this.table.addRowClickListener(rowClickListener);

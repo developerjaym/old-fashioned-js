@@ -19,42 +19,66 @@
     const sceneManager = new SceneManager();
     const model = new Model();
     const controller = new Controller(model);
-    controller.refresh = (currentPage, resultsPerPage, searchTerm = '') => {
+    controller.refresh = (params) => {
         fetch('https://jayckers.com/old-fashioned/examples/batteries.json')
             .then(response => response.json())
             .then(data => {
                 // This is basically functioning as a pretend back end
-                data = data.filter(d => d.address.name.toLowerCase().includes(searchTerm.toLowerCase()));
-                const minIndex = (currentPage-1) * resultsPerPage;
-                const maxIndex = Math.min((minIndex + resultsPerPage), data.length);
+                
+                data = data.filter(d => d.address.name.toLowerCase().includes(params.searchTerm.toLowerCase()));
+                for (let sort of params.columns.filter(col => col.sort && col.sort !== SortDirection.OFF)) {
+                    data.sort((a, b) => {
+
+                        const keys = sort.key.split(".");
+                        let valA = a;
+                        let valB = b;
+                        for (let key of keys) {
+                            valA = valA[key];
+                            valB = valB[key];
+                        }
+                        let response = 0;
+                        if(valA > valB) {
+                            response = -1;
+                        }
+                        else if(valB > valA) {
+                            response = 1;
+                        }
+                        if(sort.sort === SortDirection.ASC) {
+                            response *= -1;
+                        }
+                        return response;
+                    });
+                }
+                const minIndex = (params.pagination.currentPage - 1) * params.pagination.resultsPerPage;
+                const maxIndex = Math.min((minIndex + params.pagination.resultsPerPage), data.length);
                 data = {
                     content: data.slice(minIndex, maxIndex),
                     pagination: {
-                        resultsPerPage,
-                        currentPage,
+                        resultsPerPage: params.pagination.resultsPerPage,
+                        currentPage: params.pagination.currentPage,
                         totalCount: data.length
-                    }
+                    },
+                    sorts:
+                        params.columns.filter(col => col.sort && col.sort !== SortDirection.OFF)
+
                 }
                 controller.onModelUpdate(data);
             });
     }
 
     const gridTable = new DecoratedTableBuilder().addColumns(
-        new Column('shipDate', 'Ship Date'),
+        new SortableColumn(new Column('shipDate', 'Ship Date')),
         new Column('address.name', 'Recipient', val => val.toUpperCase()),
         new Column('address.country', 'Country')
     )
-    .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
-    .addSearch()
-    .addPagination()
-    .addChangeListener(e => {
-        if(e.searchTerm) {
-            e.pagination.currentPage = 1; // go back to first page
-        }
-        controller.refresh(e.pagination.currentPage, e.pagination.resultsPerPage, e.searchTerm);
+        .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
+        .addSearch()
+        .addPagination()
+        .addChangeListener(e => {
+            controller.refresh(e);
 
-    })
-    .build();
+        })
+        .build();
     const gridScene = sceneManager.createScene('grid', 'Battery Grid')
         .add(
             new Container()
@@ -64,7 +88,6 @@
         )
         .add(
             gridTable
-
             , Position.CENTER
         )
         .add(
@@ -73,7 +96,25 @@
         );
     model.addObserver(gridTable);
 
-    controller.refresh(1, 2);
+    controller.refresh({
+        "columns": [
+            {
+                "key": "shipDate",
+                "sort": "asc"
+            },
+            {
+                "key": "address.name"
+            },
+            {
+                "key": "address.country"
+            }
+        ],
+        "searchTerm": "",
+        "pagination": {
+            "resultsPerPage": 2,
+            "currentPage": 1
+        }
+    });
 
     sceneManager.routeTo('grid');
 </script>

@@ -351,8 +351,13 @@ class Button extends BaseInputComponent {
 
     this.e = BAR.e2("button", this.id, this.classes);
     this.e.innerText = value;
-    this.e.addEventListener("click", (e) =>
-      this.actionListeners.forEach((listener) => listener()));
+    this.e.addEventListener("click", (e) =>{
+      e.stopPropagation();
+      this.actionListeners.forEach((listener) => listener())});
+  }
+  setText(newText) {
+    this.value = newText;
+    this.e.innerText = newText;
   }
 }
 
