@@ -7,6 +7,24 @@ const SortDirection = {
     ASC: 'asc',
     DESC: 'desc'
 }
+class TableResponse {
+    constructor() {
+        this.pagination = {
+            resultsPerPage: 2,
+            currentPage: 1
+        }
+        this.searchTerm = '';
+    }
+    setPagination(pagination) {
+        this.pagination = pagination;
+    }
+    setSearch(search) {
+        this.searchTerm = search;
+    }
+    setColumns(columns) {
+        this.columns = columns;
+    }
+}
 class SortState {
     constructor(sortDirection) {
         this.sortDirection = sortDirection;
@@ -71,11 +89,11 @@ class Row extends Container {
     constructor(actionListener) {
         super(new NoLayout(), 'row');
         this.actionListener = actionListener;
+        this.e = BAR.e2("tr", this.id, this.classes);
         if (this.actionListener) {
             this.classes.push('clickable-row');
+            this.e.addEventListener("click", (e) => this.actionListener());
         }
-        this.e = BAR.e2("tr", this.id, this.classes);
-        this.e.addEventListener("click", (e) => this.actionListener());
     }
 }
 class ColumnDecorator {
@@ -103,7 +121,7 @@ class Column extends ColumnDecorator {
         this.label = label;
         this.transformer = transformer;
     }
-    onUpdate(message) {}
+    onUpdate(message) { }
     getHeader() {
         return new Cell(this.label, CellType.HEAD);
     }
@@ -116,7 +134,7 @@ class Column extends ColumnDecorator {
         return new Cell(val, CellType.DATA).setTransformer(this.transformer);
     }
     getValue() {
-        return {key: this.key};
+        return { key: this.key };
     }
 }
 class SortableColumn extends ColumnDecorator {
@@ -132,10 +150,10 @@ class SortableColumn extends ColumnDecorator {
         this.setSort(initialSort);
     }
     setSort(sortDirection) {
-        if(sortDirection === SortDirection.ASC) {
+        if (sortDirection === SortDirection.ASC) {
             this.sort = new AscSortState();
         }
-        else if(sortDirection === SortDirection.DESC) {
+        else if (sortDirection === SortDirection.DESC) {
             this.sort = new DescSortState();
         }
         else {
@@ -145,7 +163,7 @@ class SortableColumn extends ColumnDecorator {
     }
     onUpdate(columnsMessage) {
         const thisColumn = columnsMessage.find(col => col.key = this.child.key);
-        if(thisColumn && thisColumn.sort) {
+        if (thisColumn && thisColumn.sort) {
             this.setSort(thisColumn.sort);
         }
         else {
@@ -153,7 +171,7 @@ class SortableColumn extends ColumnDecorator {
         }
     }
     getHeader() {
-        return new Container().add(this.child.getHeader(), Position.CENTER).add(this.sortButton, Position.EAST);
+        return new Container().add(this.child.getHeader(), Position.WEST).add(this.sortButton, Position.CENTER);
     }
     getCell(dataRow) {
         return this.child.getCell(dataRow);
@@ -170,7 +188,7 @@ class Pagination extends Container {
         this.resultsPerPage = resultsPerPage;
         this.currentPage = currentPage;
         this.maxPage = 0;
-        this.pageChangeListener = (newPageNumber, newResultsPerPage) => { console.log(newPageNumber, newResultsPerPage); };
+        this.pageChangeListener = (newPageNumber, newResultsPerPage) => { };
         this.backButton = new Button('Go Back').addActionListener(e => this.changePage('back'));
         this.label = new Label(`Page ${this.currentPage} of ${this.maxPage}`, 'wide');
         this.nextButton = new Button('Go to Next Page').addActionListener(e => this.changePage('next'));
@@ -189,7 +207,7 @@ class Pagination extends Container {
         this.currentPage = newPagination.currentPage;
         this.maxPage = Math.ceil(newPagination.totalCount / this.resultsPerPage);
         this.label.setText(`Page ${this.currentPage} of ${this.maxPage}`);
-        if (this.maxPage === this.currentPage) {
+        if (this.maxPage <= this.currentPage) {
             this.remove(this.nextButton);
         }
         else {
@@ -278,12 +296,12 @@ class TableImpl extends TableDecorator {
         }
     }
     getValue() {
-        const params = {};
+        const params = new TableResponse();
         const columnParams = [];
-        for(let column of this.columns) {
+        for (let column of this.columns) {
             columnParams.push(column.getValue());
         }
-        params.columns = columnParams;
+        params.setColumns(columnParams);
         return params;
     }
 }
@@ -300,7 +318,7 @@ class TableSearch extends TableDecorator {
 
     getValue() {
         const params = this.child.getValue();
-        params.searchTerm = this.searchField.getValue();
+        params.setSearch(this.searchField.getValue());
         return params;
     }
     onUpdate(message) {
@@ -322,10 +340,12 @@ class TablePagination extends TableDecorator {
     }
     getValue() {
         const params = this.child.getValue();
-        params.pagination = {
-            resultsPerPage: this.pagination.resultsPerPage,
-            currentPage: this.pagination.currentPage
-        }
+        params.setPagination(
+            {
+                resultsPerPage: this.pagination.resultsPerPage,
+                currentPage: this.pagination.currentPage
+            }
+        )
         return params;
     }
     onUpdate(message) {
@@ -334,10 +354,82 @@ class TablePagination extends TableDecorator {
     }
 }
 
+class TableChangeRule {
+    constructor(tableParamsKey, tableParamsModifier) {
+        this.tableParamsKey = tableParamsKey;
+        this.tableParamsModifier = tableParamsModifier;
+    }
+}
+
+class TableChangeManager {
+    constructor(changeListener = (e) => { }) {
+        this.hasEverChanged = false;
+        this.changeListener = changeListener;
+        this.value = new TableResponse();
+        this.rules = [new TableChangeRule('searchTerm', tableResponse => {
+            tableResponse.setPagination({
+                resultsPerPage: tableResponse.pagination.resultsPerPage,
+                currentPage: 1
+            }
+            );
+        }
+        ),
+        new TableChangeRule('columns', tableResponse => {
+            tableResponse.setPagination({
+                resultsPerPage: tableResponse.pagination.resultsPerPage,
+                currentPage: 1
+            }
+            );
+
+        })
+
+        ];
+    }
+    setChangeListener(changeListener) {
+        this.changeListener = changeListener;
+    }
+    onChange(e) {
+        const changedKeys = this.findChangedKeys(e);
+        if(this.hasEverChanged) {
+
+            this.rules.filter(rule => changedKeys.includes(rule.tableParamsKey)).forEach(rule => {
+                rule.tableParamsModifier(e);
+            });
+        }
+        this.hasEverChanged = true;
+        this.changeListener(e);
+    }
+    addRule(rule) {
+        this.rules.push(rule);
+    }
+    findChangedKeys(e) {
+        if (!this.value) {
+            this.value = e;
+            return Object.keys(e); // all are changed
+        }
+        else {
+            const keysOfOld = Object.keys(this.value);
+            const keysOfNew = Object.keys(e);
+            const changedKeys = [];
+            for (let keyOfNewValue of keysOfNew) {
+                if (!keysOfOld.includes(keyOfNewValue)) {
+                    // brand new key, so this is a change
+                    changedKeys.push(keyOfNewValue);
+                }
+                else if (JSON.stringify(this.value[keyOfNewValue]) !== JSON.stringify(e[keyOfNewValue])) {
+                    changedKeys.push(keyOfNewValue);
+                }
+            }
+            this.value = e;
+            return changedKeys;
+        }
+    }
+}
+
 class DecoratedTableBuilder {
     constructor() {
         this.table = new TableImpl();
-        this.changeListener = (e) => { };
+        this.tableChangeManager = new TableChangeManager();
     }
     addRowClickListener(rowClickListener) {
         this.table.addRowClickListener(rowClickListener);
@@ -348,20 +440,18 @@ class DecoratedTableBuilder {
         return this;
     }
     addSearch() {
-        // Search should decorate the grid
         this.table = new TableSearch(this.table);
         return this;
     }
     addPagination() {
-        // Pagination should 'decorate' the grid
         this.table = new TablePagination(this.table, 1, 1);
         return this;
     }
     addChangeListener(changeListener) {
-        this.changeListener = changeListener;
+        this.tableChangeManager.setChangeListener(changeListener);
         return this;
     }
     build() {
-        return this.table.addChangeListener(this.changeListener);
+        return this.table.addChangeListener(e => this.tableChangeManager.onChange(e));
     }
 }

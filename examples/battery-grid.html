@@ -24,7 +24,6 @@
             .then(response => response.json())
             .then(data => {
                 // This is basically functioning as a pretend back end
-                
                 data = data.filter(d => d.address.name.toLowerCase().includes(params.searchTerm.toLowerCase()));
                 for (let sort of params.columns.filter(col => col.sort && col.sort !== SortDirection.OFF)) {
                     data.sort((a, b) => {
@@ -89,10 +88,6 @@
         .add(
             gridTable
             , Position.CENTER
-        )
-        .add(
-            new Button("Refresh").addActionListener((e) => controller.refresh(1, 1)),
-            Position.SOUTH
         );
     model.addObserver(gridTable);
 
