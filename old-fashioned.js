@@ -294,6 +294,7 @@ class BaseInputComponent extends Component {
     this.e = BAR.e2("input", this.id, this.classes);
     this.e.value = value || "";
     this.inputListener = (e) => {
+      e.stopPropagation();
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
           listener(e.target.value);
@@ -408,6 +409,7 @@ class TextArea extends BaseInputComponent {
     this.e = BAR.e2("textarea", this.id, this.classes);
     this.e.value = text || "";
     this.e.addEventListener("input", (e) => {
+      e.stopPropagation();
       this.actionListeners.forEach((listener) => {
         if (!this.disabled) {
           listener(e.target.value);
@@ -468,7 +470,8 @@ class SceneManager extends Container {
     BAR.doc.title = this.title;
     this.routes = {};
 
-    BAR.w.addEventListener("hashchange", (event) => {
+    BAR.w.addEventListener("hashchange", (e) => {
+      e.stopPropagation();
       // browser updates location, take that hash (sceneId) and route to it.
       this.routeTo(location.hash.replace(/^#/, ""));
     });
