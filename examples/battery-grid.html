@@ -1,119 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../old-fashioned.css" />
-    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png">
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png" />
     <script src="../old-fashioned.js"></script>
     <script src="../old-fashioned-forms.js"></script>
     <script src="../old-fashioned-convenience.js"></script>
     <script src="../old-fashioned-grids.js"></script>
-</head>
+  </head>
 
-<body id="glass">
-
-</body>
-<script>
+  <body id="glass"></body>
+  <script>
     const sceneManager = new SceneManager();
     const model = new Model();
     const controller = new Controller(model);
     controller.refresh = (params) => {
-        fetch('https://jayckers.com/old-fashioned/examples/batteries.json')
-            .then(response => response.json())
-            .then(data => {
-                // This is basically functioning as a pretend back end
-                data = data.filter(d => d.address.name.toLowerCase().includes(params.searchTerm.toLowerCase()));
-                for (let sort of params.columns.filter(col => col.sort && col.sort !== SortDirection.OFF)) {
-                    data.sort((a, b) => {
-
-                        const keys = sort.key.split(".");
-                        let valA = a;
-                        let valB = b;
-                        for (let key of keys) {
-                            valA = valA[key];
-                            valB = valB[key];
-                        }
-                        let response = 0;
-                        if (valA > valB) {
-                            response = -1;
-                        }
-                        else if (valB > valA) {
-                            response = 1;
-                        }
-                        if (sort.sort === SortDirection.ASC) {
-                            response *= -1;
-                        }
-                        return response;
-                    });
-                }
-                const minIndex = (params.pagination.currentPage - 1) * params.pagination.resultsPerPage;
-                const maxIndex = Math.min((minIndex + params.pagination.resultsPerPage), data.length);
-                data = {
-                    content: data.slice(minIndex, maxIndex),
-                    pagination: {
-                        resultsPerPage: params.pagination.resultsPerPage,
-                        currentPage: params.pagination.currentPage,
-                        totalCount: data.length
-                    },
-                    sorts:
-                        params.columns.filter(col => col.sort && col.sort !== SortDirection.OFF)
-
-                }
-                controller.onModelUpdate(data);
+      fetch("https://jayckers.com/old-fashioned/examples/batteries.json")
+        .then((response) => response.json())
+        .then((data) => {
+          // This is basically functioning as a pretend back end
+          data = data.filter((d) =>
+            d.address.name
+              .toLowerCase()
+              .includes(params.searchTerm.toLowerCase())
+          );
+          for (let sort of params.columns.filter(
+            (col) => col.sort && col.sort !== SortDirection.OFF
+          )) {
+            data.sort((a, b) => {
+              const keys = sort.key.split(".");
+              let valA = a;
+              let valB = b;
+              for (let key of keys) {
+                valA = valA[key];
+                valB = valB[key];
+              }
+              let response = 0;
+              if (valA > valB) {
+                response = -1;
+              } else if (valB > valA) {
+                response = 1;
+              }
+              if (sort.sort === SortDirection.ASC) {
+                response *= -1;
+              }
+              return response;
             });
-    }
+          }
+          const minIndex =
+            (params.pagination.currentPage - 1) *
+            params.pagination.resultsPerPage;
+          const maxIndex = Math.min(
+            minIndex + params.pagination.resultsPerPage,
+            data.length
+          );
+          data = {
+            content: data.slice(minIndex, maxIndex),
+            pagination: {
+              resultsPerPage: params.pagination.resultsPerPage,
+              currentPage: params.pagination.currentPage,
+              totalCount: data.length,
+            },
+            sorts: params.columns.filter(
+              (col) => col.sort && col.sort !== SortDirection.OFF
+            ),
+          };
+          controller.onModelUpdate(data);
+        });
+    };
 
-    const gridTable = new DecoratedTableBuilder().addColumns(
-        new FormColumn(new SortableColumn(new Column('shipDate', 'Ship Date')), 
-            (dataRow) => new DateFormEntry('shipDate', dataRow.shipDate, '', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')))
-                        ,
-        new Column('address.name', 'Recipient', val => val.toUpperCase()),
-        new Column('address.country', 'Country')
-    )
-        // .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
-        .addSearch()
-        .addPagination()
-        .addChangeListener(e => {
-            controller.refresh(e);
-
-        })
-        .build();
-    const gridScene = sceneManager.createScene('grid', 'Battery Grid')
-        .add(
-            new Container()
-                .add(new Label("Battery Orders", FontSize.SECOND_HEADER), Position.WEST)
-                .add(new Button("Create New Order").addActionListener(e => BAR.w.location.href = "battery-order-app.html"), Position.EAST)
-            , Position.NORTH
-        )
-        .add(
-            gridTable
-            , Position.CENTER
-        );
+    const gridTable = new DecoratedTableBuilder()
+      .addColumns(
+        new SortableColumn(new Column("shipDate", "Ship Date")),
+        new Column("address.name", "Recipient", (val) => val.toUpperCase()),
+        new Column("address.country", "Country")
+      )
+      .addRowClickListener((e) =>
+        alert("You clicked an order for " + e.address.name)
+      )
+      .addSearch()
+      .addPagination()
+      .addChangeListener((e) => {
+        controller.refresh(e);
+      })
+      .build();
+    const gridScene = sceneManager
+      .createScene("grid", "Battery Grid")
+      .add(
+        new Container()
+          .add(
+            new Label("Battery Orders", FontSize.SECOND_HEADER),
+            Position.WEST
+          )
+          .add(
+            new Button("Create New Order").addActionListener(
+              (e) => (BAR.w.location.href = "battery-order-app.html")
+            ),
+            Position.EAST
+          ),
+        Position.NORTH
+      )
+      .add(gridTable, Position.CENTER);
     model.addObserver(gridTable);
 
     controller.refresh({
-        "columns": [
-            {
-                "key": "shipDate",
-                "sort": "asc"
-            },
-            {
-                "key": "address.name"
-            },
-            {
-                "key": "address.country"
-            }
-        ],
-        "searchTerm": "",
-        "pagination": {
-            "resultsPerPage": 2,
-            "currentPage": 1
-        }
+      columns: [
+        {
+          key: "shipDate",
+          sort: "asc",
+        },
+        {
+          key: "address.name",
+        },
+        {
+          key: "address.country",
+        },
+      ],
+      searchTerm: "",
+      pagination: {
+        resultsPerPage: 2,
+        currentPage: 1,
+      },
     });
 
-    sceneManager.routeTo('grid');
-</script>
-
+    sceneManager.routeTo("grid");
+  </script>
 </html>

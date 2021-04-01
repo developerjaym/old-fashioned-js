@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Financial Planner</title>
+    <link rel="stylesheet" href="../old-fashioned.css" />
+    <link async rel="icon" type="image/x-icon" href="../old-fashioned.png" />
+    <script src="../old-fashioned.js"></script>
+    <script src="../old-fashioned-forms.js"></script>
+    <script src="../old-fashioned-wizards.js"></script>
+    <script src="../old-fashioned-convenience.js"></script>
+  </head>
+
+  <body>
+    <div id="glass"></div>
+  </body>
+  <script>
+    const sceneManager = new SceneManager();
+    const analyze = (o) => {
+      let amountNeeded = (o.expenses * 12 - o.income * 12) * 33;
+      amountNeeded = amountNeeded < 0 ? 0 : amountNeeded;
+      answerScreen.removeAll();
+      answerScreen
+        .add(
+          new LongText(`You can retire if you have $${amountNeeded} saved up.
+          Your expenses are $${o.expenses} per month.
+          Your income is $${o.income} per month.
+            `),
+          Position.CENTER
+        )
+        .add(new Label("Answer", FontSize.FIRST_HEADER), Position.NORTH);
+      sceneManager.routeTo("answers");
+    };
+
+    const questionScene = sceneManager.createScene("questions", "Questions");
+    const answerScreen = sceneManager.createScene("answers", "Answer");
+    questionScene.add(
+      new SubmissionForm("Questions", analyze, "Analyze")
+        .addChildren(
+          new NumberFormEntry(
+            "expenses",
+            0,
+            "Estimated Monthly Expenses",
+            new Validator("Enter a number greater than 0", (val) => val < 1)
+          ),
+          new NumberFormEntry(
+            "income",
+            0,
+            "Estimated Monthly Income (Social Security, etc)",
+            new Validator("Enter a number greater than 0", (val) => val < 1)
+          )
+        )
+        .getComponent(),
+      Position.CENTER
+    );
+    sceneManager.routeTo("questions");
+  </script>
+</html>
