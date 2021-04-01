@@ -57,7 +57,13 @@ const DateValidators = {
   AFTER_TODAY: new Validator("Date must be after today.", (val) => val && new Date(val + 'T23:59:59.999Z') <= new Date())
 }
 
-
+class FormContainer extends Container {
+  constructor(layout = new BorderLayout(), ...classes) {
+    super(layout, ...classes);
+    this.e = BAR.e2("div", this.id, this.classes);
+    this.e.style.cssText += this.layout.getStyle();
+  }
+}
 
 class BaseFormEntry {
   constructor(key, value, label, ...validators) {
@@ -138,15 +144,17 @@ class BaseArrayFormEntry extends BaseInputFormEntry {
     super(key, value, label, new TextField(""));
     this.component.remove(this.inputComponent);
     this.inputContainer = new Container();
-    this.childrenContainer = new Container(new FlexLayout(LayoutDirection.ROW));
+    this.childrenContainer = new Container(new FlexLayout(LayoutDirection.COLUMN));
     this.inputContainer.add(this.childrenContainer, Position.CENTER);
     this.children = [];
     this.arrayLevelValidators = [];
     this.elementLevelValidators = [];
+    this.additionalComponents = [];
     this.value.forEach(item => {
       this.supplyChild(item);
     });
-    this.inputContainer.add(new Button(addLabel).addActionListener(e => this.supplyChild()), Position.SOUTH);
+    this.addButton = new Button(addLabel).addActionListener(e => this.supplyChild());
+    this.inputContainer.add(this.addButton, Position.SOUTH);
     this.component.add(this.inputContainer, Position.CENTER);
   }
   addArrayLevelValidators(...arrayLevelValidators) {
@@ -185,20 +193,36 @@ class TextArrayFormEntry extends BaseArrayFormEntry {
   supplyChild(val) {
     const textField = new TextFormEntry('', val, '', this.elementLevelValidators);
     this.children.push(textField);
-
+    const xButton = new Button("X", CommonClasses.WARNING, 'start')
+    .addActionListener(e => {
+      this.children.splice(this.children.indexOf(textField), 1);
+      this.childrenContainer.remove(container)
+      this.getValidationErrors();
+    });
+    this.additionalComponents.push(xButton);
     const container = new Container(new BorderLayout(), CommonClasses.SMALL_CONTAINER)
       .add(textField.getComponent(), Position.CENTER)
-      .add(new Button("X", CommonClasses.WARNING, 'start')
-        .addActionListener(e => {
-          this.children.splice(this.children.indexOf(textField), 1);
-          this.childrenContainer.remove(container)
-          this.getValidationErrors();
-        })
+      .add(xButton
         ,
         Position.EAST
       );
     this.childrenContainer.add(container);
     this.getValidationErrors();
+  }
+  setDisabled(disabled) {
+    if(disabled) {
+      this.inputContainer.remove(this.addButton);
+    }
+    else {
+      this.inputContainer.add(this.addButton, Position.SOUTH);
+    }
+    this.additionalComponents.forEach(comp => comp.e.setAttribute("hidden", disabled));
+    for(const child of this.children) {
+      child.setDisabled(disabled);
+    }
+    for(const additional of this.additionalComponents) {
+      additional.setDisabled(disabled);
+    }
   }
 }
 class CheckboxFormEntry extends BaseInputFormEntry {
@@ -345,9 +369,9 @@ class FormEntryGroup extends BaseFormEntry {
 class SubmissionForm extends FormEntryGroup {
   constructor(label, listener, buttonLabel = "Submit") {
     super("", {}, label);
-    this.component = new Container(new NcsLayout(), FormClasses.FORM);
+    this.component = new FormContainer(new NcsLayout(), FormClasses.FORM);
     this.listener = listener;
-    this.submissionButton = new Button(buttonLabel);
+    this.submissionButton = new Button(buttonLabel).setType("submit");
     this.submissionButton.addActionListener((e) => this.submit());
     this.center = new Container(new GridLayout(1));
     this.component

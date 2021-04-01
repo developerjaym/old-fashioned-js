@@ -19,7 +19,7 @@
     listScene.add(
         new SubmissionForm('TODO List', (o) => localStorage.setItem("todo-example", JSON.stringify(o)), "Save")
             .addChildren(
-                new FormEntryGroupArray('items', localStorage.getItem('todo-example') ? JSON.parse(localStorage.getItem('todo-example')).items.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)) : [], 'Items',
+                new FormEntryGroupArray('items', localStorage.getItem('todo-example') ? JSON.parse(localStorage.getItem('todo-example')).items.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).sort((a, b) => a.done - b.done) : [], 'Items',
                     (item, counter) => new FormEntryGroup('item', {}, 'Item ' + counter).removable()
                         .addChildren(
                             new TextFormEntry('title', item.title, 'Title', StringValidators.NOT_EMPTY),

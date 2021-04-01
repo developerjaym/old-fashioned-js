@@ -50,7 +50,7 @@
 
             const sceneManager = new SceneManager();
             const listScene = sceneManager.createScene('notes', 'Old Fashioned Notes');
-
+            sceneManager.routeTo('notes');
             listScene.onUpdate = (updatedItems) => {
                 listScene.removeAll();
                 const searchField = new TextField().setAriaLabel("Search");
@@ -80,7 +80,7 @@
             model.addObserver(listScene);
             controller.onModelUpdate(localStorage.getItem('notes-example') ? JSON.parse(localStorage.getItem('notes-example')).items : []);
 
-            sceneManager.routeTo('notes');
+            
         };
     </script>
 </head>

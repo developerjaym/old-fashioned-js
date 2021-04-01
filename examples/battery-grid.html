@@ -36,13 +36,13 @@
                             valB = valB[key];
                         }
                         let response = 0;
-                        if(valA > valB) {
+                        if (valA > valB) {
                             response = -1;
                         }
-                        else if(valB > valA) {
+                        else if (valB > valA) {
                             response = 1;
                         }
-                        if(sort.sort === SortDirection.ASC) {
+                        if (sort.sort === SortDirection.ASC) {
                             response *= -1;
                         }
                         return response;
@@ -66,11 +66,13 @@
     }
 
     const gridTable = new DecoratedTableBuilder().addColumns(
-        new SortableColumn(new Column('shipDate', 'Ship Date')),
+        new FormColumn(new SortableColumn(new Column('shipDate', 'Ship Date')), 
+            (dataRow) => new DateFormEntry('shipDate', dataRow.shipDate, '', StringValidators.NOT_EMPTY, DateValidators.BETWEEN('2020-10-08', '2020-10-10')))
+                        ,
         new Column('address.name', 'Recipient', val => val.toUpperCase()),
         new Column('address.country', 'Country')
     )
-        .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
+        // .addRowClickListener(e => alert('You clicked an order for ' + e.address.name))
         .addSearch()
         .addPagination()
         .addChangeListener(e => {

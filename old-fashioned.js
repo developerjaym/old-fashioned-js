@@ -13,6 +13,7 @@ const CommonClasses = {
   DISABLED: "disabled",
   HIDDEN: "hidden",
   WARNING: "warning",
+  BOLD: "bold",
   SMALL_CONTAINER: "width-360"
 }
 const Position = {
@@ -355,6 +356,10 @@ class Button extends BaseInputComponent {
     this.e.addEventListener("click", (e) =>{
       e.stopPropagation();
       this.actionListeners.forEach((listener) => listener())});
+  }
+  setType(type) {
+    this.e.setAttribute("type", type);
+    return this;
   }
   setText(newText) {
     this.value = newText;

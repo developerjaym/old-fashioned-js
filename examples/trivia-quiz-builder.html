@@ -23,6 +23,7 @@
                     sceneManager.routeTo('confirmation');
                 }, 'Generate JSON').addChildren(
                     new TextFormEntry('name', '', 'Name', StringValidators.NOT_EMPTY),
+                    new TextAreaFormEntry('description', '', 'Description', StringValidators.NOT_EMPTY),
                     new TextArrayFormEntry('categories', [], 'Categories', 'Add Category').addArrayLevelValidators(ArrayValidators.NOT_EMPTY).addElementLevelValidators(StringValidators.NOT_EMPTY),
                     new NumberFormEntry('difficulty', 1, 'Difficulty', new Validator('Enter a number between 1 and 5', (val) => val < 1 || val > 5)),
 
