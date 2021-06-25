@@ -39,7 +39,7 @@
                                         return !val.options || val.options.length === 0; // fail validation if there are no options but should be
                                     }
                                 })
-                                )
+                                ).removable()
                             .addChildren(
                                 new TextFormEntry('prompt', '', 'Prompt'),
                                 new TextArrayFormEntry('hints', [], 'Hints', 'Add Hint').addElementLevelValidators(StringValidators.NOT_EMPTY),
